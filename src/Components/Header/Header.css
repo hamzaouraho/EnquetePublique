@@ -1,0 +1,36 @@
+.HeaderBox {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 36px;
+}
+.AUIMG {
+  width: 391px;
+  height: 80px;
+  padding: 7px;
+  border: 1px solid #c43d4e;
+  cursor: pointer;
+}
+.pMinistere {
+  font-size: 13px;
+  line-height: 16px;
+  margin-bottom: 2px;
+  font-weight: 500;
+  color: #444;
+  padding-top: 15px;
+}
+.pBox {
+  width: 420px;
+  height: 100px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.HeaderBoxMin {
+  display: flex;
+  justify-content: start;
+  margin-left: 60px;
+}
+.HeaderBoxLoc {
+  margin-right: 60px;
+  padding: 15px;
+}

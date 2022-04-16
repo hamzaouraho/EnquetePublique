@@ -1,0 +1,38 @@
+.map-container {
+  /* border-radius: 15px; */
+  height: 700px;
+  width: 100%;
+  flex: 6;
+}
+#map {
+  /* border-radius: 15px; */
+  height: 100%;
+}
+.map-frame {
+  /* border: 8px solid #117a8b; */
+  /* border-radius: 15px; */
+  height: 100%;
+}
+.div-ombre {
+  display: flex;
+  justify-content: space-evenly;
+  flex-wrap: wrap;
+  background-color: #5e5e5f0d;
+  border: 2px solid white;
+  margin: 15px;
+  padding: 20px;
+  border-radius: 2px;
+  box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
+}
+.div-commentaire {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-evenly;
+  flex-wrap: wrap;
+  background-color: #5e5e5f0d;
+  border: 1px solid #c3c4c3;
+  /* margin: 30px 20px 20px 20px; */
+  margin: 20px 20px;
+  padding: 20px;
+  box-shadow: 0 4px 4px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
+}

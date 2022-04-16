@@ -1,0 +1,158 @@
+@import url("https://fonts.googleapis.com/css2?family=Roboto&display=swap");
+.etudeBox {
+  width: 75%;
+  border: 2px solid rgb(245, 245, 245);
+  border-radius: 12px;
+  height: 250px;
+  box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
+  margin: 30px 10px 20px 10px;
+  display: flex;
+  justify-content: space-around;
+}
+.etudeHeader > img {
+  width: 160px;
+  height: 160px;
+  box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
+}
+.etudeHeader {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+.etudeBody {
+  flex: 3;
+}
+.etudeFooter {
+  flex: 1;
+}
+.titreHeader {
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+  color: rgb(65, 65, 65);
+  font-weight: 600;
+  font-size: 1.1em;
+  height: 20px;
+  margin-top: 40px;
+}
+.titreBody {
+  font-family: Arial, Helvetica, sans-serif;
+  font-weight: 480;
+}
+.iconsEtude {
+  margin: 5px 10px 5px 0;
+}
+.button-29 {
+  align-items: center;
+  appearance: none;
+  background-image: radial-gradient(
+    100% 100% at 100% 0,
+    #243455 0,
+    #353b48 100%
+  );
+  border: 0;
+  border-radius: 6px;
+  box-shadow: rgba(45, 35, 66, 0.4) 0 2px 4px,
+    rgba(45, 35, 66, 0.3) 0 7px 13px -3px, rgba(58, 65, 111, 0.5) 0 -3px 0 inset;
+  box-sizing: border-box;
+  color: #fff;
+  cursor: pointer;
+  display: inline-flex;
+  font-family: "JetBrains Mono", monospace;
+  height: 48px;
+  justify-content: center;
+  line-height: 1;
+  list-style: none;
+  overflow: hidden;
+  padding-left: 16px;
+  padding-right: 16px;
+  position: relative;
+  text-align: left;
+  text-decoration: none;
+  transition: box-shadow 0.15s, transform 0.15s;
+  user-select: none;
+  -webkit-user-select: none;
+  touch-action: manipulation;
+  white-space: nowrap;
+  will-change: box-shadow, transform;
+  font-size: 18px;
+}
+
+.button-29:focus {
+  box-shadow: #117a8b 0 0 0 1.5px inset, rgba(45, 35, 66, 0.4) 0 2px 4px,
+    rgba(45, 35, 66, 0.3) 0 7px 13px -3px, #3e676d 0 -3px 0 inset;
+}
+
+.button-29:hover {
+  box-shadow: rgba(45, 35, 66, 0.4) 0 4px 8px,
+    rgba(45, 35, 66, 0.3) 0 7px 13px -3px, #117a8b 0 -3px 0 inset;
+  transform: translateY(-2px);
+}
+
+.button-29:active {
+  box-shadow: #117a8b 0 3px 7px inset;
+  transform: translateY(2px);
+}
+.etudeFooter {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-evenly;
+  padding: 20px 0px 20px 0px;
+}
+.dateDebut {
+  font-family: Cambria, Cochin, Georgia, Times, "Times New Roman", serif;
+  font-weight: 400;
+}
+.titreFooter {
+  display: flex;
+}
+.dateDebut {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+.dateDebut > div {
+  font-family: "Times New Roman", Times, serif;
+  font-weight: 550;
+  font-size: 1rem;
+}
+.dateDebut > div > span {
+  font-family: Arial, Helvetica, sans-serif;
+  color: #117a8b;
+  font-weight: bold;
+}
+.progresBar {
+  flex: 2;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+.progresBar > p {
+  padding-top: 13px;
+  margin-left: 10px;
+  color: #117a8b;
+  font-weight: bold;
+}
+.progress {
+  background-color: #d8d8d8;
+  border-radius: 20px;
+  position: relative;
+  margin: 15px 0;
+  height: 30px;
+  width: 250px;
+}
+
+.progress-done {
+  background: linear-gradient(to left, #f2709c, #ff9472);
+  box-shadow: 0 3px 3px -5px #f2709c, 0 2px 5px #f2709c;
+  border-radius: 20px;
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  width: 0;
+  opacity: 0;
+  transition: 1s ease 0.3s;
+}

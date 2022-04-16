@@ -1,0 +1,63 @@
+.buttonn {
+  color: red;
+  background-color: red;
+}
+.navbar {
+  background-color: #1e487a;
+}
+.nav-link {
+  color: rgb(255, 255, 255);
+  padding: 0px;
+  margin: 0px;
+  height: 110%;
+  font-weight: 400;
+  font-size: 18px;
+}
+.navbar-nav > li {
+  border-right: 0.1rem solid white;
+}
+
+.p-2 {
+  border-left: 0.1rem solid white;
+}
+
+ul > li {
+  padding: 5px 0px 5px 0px;
+}
+li.nav-item {
+  padding: 3px 4px;
+}
+li.nav-item:hover {
+  color: white;
+  background-color: darkred;
+}
+li.nav-item:active {
+  color: white;
+  background-color: darkred;
+}
+
+.nav-item > a:hover {
+  color: white;
+  background-color: danger;
+}
+.navhaut {
+  padding: 0px;
+  margin: 0px;
+}
+
+.iconstyle {
+  padding: 4px 9px;
+  border-left: 0.1rem solid white;
+}
+.box-header:hover {
+  color: white;
+  background-color: darkred;
+}
+.box-header {
+  color: white;
+  padding: 9px 0px;
+}
+.box-header > li {
+  color: white;
+  border-right: 0.1rem solid white;
+}
