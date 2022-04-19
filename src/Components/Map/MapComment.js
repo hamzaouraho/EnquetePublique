@@ -4,6 +4,7 @@ import GeoJSONLayer from "@arcgis/core/layers/GeoJSONLayer";
 import Sketch from "@arcgis/core/widgets/Sketch";
 import GraphicsLayer from "@arcgis/core/layers/GraphicsLayer";
 import * as webMercatorUtils from "@arcgis/core/geometry/support/webMercatorUtils";
+import Graphic from "@arcgis/core/Graphic";
 import "./Map.css";
 import React, { useEffect, useRef, useState } from "react";
 import "./Map.css";
@@ -21,7 +22,14 @@ const MyMap = () => {
   const [graphicLayers, setgraphicLayers] = useState(new GraphicsLayer());
   const [MapLayers, setMapLayers] = useState(new Map());
   const [File, setFile] = useState("");
+  const [ShowAddComment, setShowAddComment] = useState(true);
+  const [geojsonGraphicLayer, setgeojsonGraphicLayer] = useState(
+    new GeoJSONLayer()
+  );
+  const [viewGlob, setviewGlob] = useState(new MapView());
+
   console.log(showResults);
+  // viewGlob.ui.add(document.getElementById("actions"), "top-right");
   useEffect(() => {
     console.log("inside");
     const graphicsLayer = new GraphicsLayer();
@@ -38,7 +46,7 @@ const MyMap = () => {
       center: [-7.614392, 33.582764],
       zoom: 11,
     });
-    view.ui.add(document.getElementById("actions"), "top-right");
+    setviewGlob(view);
     // console.log(JSON.stringify(said, null, 4));
     const blob = new Blob([JSON.stringify(said)], {
       type: "application/json",
@@ -103,6 +111,7 @@ const MyMap = () => {
       sketch.on("create", function (event) {
         // respond to create event while the cursor is being moved on the view.
         const eventInfo = event.toolEventInfo;
+        setShowAddComment(true);
 
         if (event.toolEventInfo && event.toolEventInfo.type === "vertex-add") {
           const addedPoint = event.toolEventInfo.added[0].geometry;
@@ -137,6 +146,7 @@ const MyMap = () => {
         // console.log(
         //   "update : " + JSON.stringify(event.graphics[0].geometry.rings[0])
         // );
+
         const tabUpdate = [];
         event.graphics[0].geometry.rings[0].map((tab) =>
           tabUpdate.push({
@@ -188,14 +198,17 @@ const MyMap = () => {
   const dataForm = (data) => {
     // console.log("******* : data : " + JSON.stringify(Entities[0]));
 
-    console.log("******* : data : " + JSON.stringify(data));
+    // console.log("******* : data : " + JSON.stringify(data));
     if (data.button === "add") {
       console.log("haniya");
       deleteEntity();
-      // deleteAllGraphics();
+      setShowAddComment(false);
+      deleteAllGraphics();
+      viewGlob.graphics.removeAll();
+      // console.log("FinalEntities before add : " + JSON.parse(FinalEntities));
       setFinalEntities((oldArray) => [...oldArray, data]);
 
-      console.log("Entities after add : " + JSON.parse(FinalEntities));
+      // console.log("FinalEntities after add : " + JSON.parse(FinalEntities));
     }
 
     const ondexx = Entities[0].indexOf(data.data);
@@ -203,18 +216,13 @@ const MyMap = () => {
   };
   const downloadTxtFile = () => {
     const element = document.createElement("a");
-    const frontBlob = new Blob(['{"type": "FeatureCollection","features": ['], {
-      type: "text/plain",
-    });
-    let kolchi = '{"type": "FeatureCollection","features": [';
-    // kolchi = kolchi + "tnaket";
-    Promise.all(
-      // console.log("FinalEntities : " + JSON.stringify(FinalEntities))
 
+    let geojsonFile = '{"type": "FeatureCollection","features": [';
+    Promise.all(
       FinalEntities.map(
         (a) =>
-          (kolchi =
-            kolchi +
+          (geojsonFile =
+            geojsonFile +
             '{"type": "Feature","properties": {"titre": "' +
             a["titre"] +
             '", "commentaire" : "' +
@@ -222,47 +230,47 @@ const MyMap = () => {
             '"},"geometry": {"type": "Polygon","coordinates": [[') |
           a["data"].map(
             (aa) =>
-              (kolchi =
-                kolchi +
+              (geojsonFile =
+                geojsonFile +
                 "[" +
                 webMercatorUtils.xyToLngLat(aa["lat"], aa["long"])[0] +
                 ", " +
                 webMercatorUtils.xyToLngLat(aa["lat"], aa["long"])[1] +
                 "],")
           ) |
-          (kolchi = kolchi.slice(0, -1) + "]]}},")
+          (geojsonFile = geojsonFile.slice(0, -1) + "]]}},")
       ),
-      (kolchi = kolchi.slice(0, -1) + "]}")
+      (geojsonFile = geojsonFile.slice(0, -1) + "]}")
     ).then(
       () => (element = document.createElement("a")),
-      console.log(kolchi),
+      console.log(geojsonFile),
       (element.href = URL.createObjectURL(
-        new Blob([JSON.parse(JSON.stringify(kolchi))], {
+        new Blob([JSON.parse(JSON.stringify(geojsonFile))], {
           type: "text/plain",
         })
       )),
-      (element.download = "myFile.geojson"),
+      (element.download = "Commentaires.geojson"),
       document.body.appendChild(element),
       element.click()
     );
 
-    const entityBlob = new Blob(
-      [
-        // FinalEntities
-        //   ? FinalEntities.map(
-        //       (a) => '{"type": "Feature","properties": {"commentaire": ',
-        //       FinalEntities ? a["comment"] : null,
-        //       " ",
-        //       '},"geometry": {"type": "Polygon","coordinates": [[',
-        //       a["data"].map((aa) => ("[", aa["lat"], "],[", aa["long"], "],")),
-        //       "]]}}"
-        //     )
-        //   : null,
-        "",
-      ],
-      { type: "text/plain" }
-    );
-    const endBlob = new Blob(["]}"], { type: "text/plain" });
+    // const entityBlob = new Blob(
+    //   [
+    //     // FinalEntities
+    //     //   ? FinalEntities.map(
+    //     //       (a) => '{"type": "Feature","properties": {"commentaire": ',
+    //     //       FinalEntities ? a["comment"] : null,
+    //     //       " ",
+    //     //       '},"geometry": {"type": "Polygon","coordinates": [[',
+    //     //       a["data"].map((aa) => ("[", aa["lat"], "],[", aa["long"], "],")),
+    //     //       "]]}}"
+    //     //     )
+    //     //   : null,
+    //     "",
+    //   ],
+    //   { type: "text/plain" }
+    // );
+    // const endBlob = new Blob(["]}"], { type: "text/plain" });
   };
 
   const showCommentsInMap = () => {
@@ -270,15 +278,12 @@ const MyMap = () => {
     const frontBlob = new Blob(['{"type": "FeatureCollection","features": ['], {
       type: "text/plain",
     });
-    let kolchi = '{"type": "FeatureCollection","features": [';
-    // kolchi = kolchi + "tnaket";
+    let geojsonFile = '{"type": "FeatureCollection","features": [';
     Promise.all(
-      // console.log("FinalEntities : " + JSON.stringify(FinalEntities))
-
       FinalEntities.map(
         (a) =>
-          (kolchi =
-            kolchi +
+          (geojsonFile =
+            geojsonFile +
             '{"type": "Feature","properties": {"titre": "' +
             a["titre"] +
             '", "commentaire" : "' +
@@ -286,31 +291,34 @@ const MyMap = () => {
             '"},"geometry": {"type": "Polygon","coordinates": [[') |
           a["data"].map(
             (aa) =>
-              (kolchi =
-                kolchi +
+              (geojsonFile =
+                geojsonFile +
                 "[" +
                 webMercatorUtils.xyToLngLat(aa["lat"], aa["long"])[0] +
                 ", " +
                 webMercatorUtils.xyToLngLat(aa["lat"], aa["long"])[1] +
                 "],")
           ) |
-          (kolchi = kolchi.slice(0, -1) + "]]}},")
+          (geojsonFile = geojsonFile.slice(0, -1) + "]]}},")
       ),
-      (kolchi = kolchi.slice(0, -1) + "]}")
+      (geojsonFile = geojsonFile.slice(0, -1) + "]}")
     ).then(() =>
+      // deleteLayer() || //||layer.visible = false;
       MapLayers.add(
         new GeoJSONLayer({
           url: URL.createObjectURL(
-            new Blob([kolchi], { type: "application/json" })
+            new Blob([geojsonFile], { type: "application/json" })
           ),
           renderer: {
             type: "simple",
             symbol: {
               type: "simple-fill", // autocasts as new SimpleFillSymbol()
-              color: "blue",
+              color: "#224c7b",
+              // style: "solid",
               outline: {
-                width: 1.5,
-                color: [255, 255, 255],
+                // autocasts as new SimpleLineSymbol()
+                color: "white",
+                width: 1,
               },
               style: "solid",
               // opacity: 0.33,
@@ -318,7 +326,8 @@ const MyMap = () => {
           },
           popupTemplate: {
             title: "Commentaire",
-            content: "Type : {titre}, Commentaire : {commentaire}",
+            content:
+              "<h4> Type : {titre}</h4>  <h4> Commentaire : {commentaire} </h4>  ",
           },
         })
       )
@@ -326,7 +335,82 @@ const MyMap = () => {
 
     // URL reference to the blob
   };
-  const reset = () => {};
+  const showCommentInMaps = () => {
+    console.log("FinalEntities : " + JSON.stringify(FinalEntities));
+    FinalEntities?.map((entities) => {
+      const hamza = new Graphic({
+        geometry: {
+          type: "polygon", // autocasts as new Polygon()
+          rings: [
+            entities["data"].map((entity) => {
+              return [
+                webMercatorUtils.xyToLngLat(entity["lat"], entity["long"])[0],
+                webMercatorUtils.xyToLngLat(entity["lat"], entity["long"])[1],
+              ];
+            }),
+
+            // [
+            //   entities["data"].map((entity) => [
+            //     webMercatorUtils.xyToLngLat(entity["lat"], entity["long"])[1] ||
+            //       webMercatorUtils.xyToLngLat(entity["lat"], entity["long"])[0],
+            //     // JSON.stringify(
+            //     //   "[" +
+            //     //     webMercatorUtils.xyToLngLat(
+            //     //       entity["lat"],
+            //     //       entity["long"]
+            //     //     )[1] +
+            //     //     "," +
+            //     //     webMercatorUtils.xyToLngLat(
+            //     //       entity["lat"],
+            //     //       entity["long"]
+            //     //     )[1] +
+            //     //     "]"
+            //     // ),
+            //   ]),
+            // ],
+          ],
+        },
+        symbol: {
+          type: "simple-fill", // autocasts as new SimpleFillSymbol()
+          color: [227, 139, 79, 0.8],
+          outline: {
+            // autocasts as new SimpleLineSymbol()
+            color: [255, 255, 255],
+            width: 1,
+          },
+        },
+        popupTemplate: {
+          title: "Commentaire",
+          content:
+            "<h4> Type : " +
+            entities["titre"] +
+            "</h4>  <h4> Commentaire : " +
+            entities["comment"] +
+            "</h4>  ",
+        },
+      });
+      console.log("rayaaah" + JSON.stringify(hamza));
+
+      viewGlob.graphics.add(hamza);
+    });
+
+    // viewGlob.graphics.add(polygonGraphic);
+  };
+  const reset = () => {
+    setFinalEntities([]);
+    viewGlob.graphics.removeAll();
+
+    // console.log("finalentities : " + JSON.stringify(FinalEntities));
+    // console.log("setChotuseEffect : " + JSON.stringify(setChotuseEffect));
+    deleteLayer();
+    setChotuseEffect([]);
+  };
+  const deleteLayer = () => {
+    // MapLayers.removeAll();
+    // MapLayers.visible = false;
+    // graphicLayers.removeAll();
+    // console.log("deleteLayer :" + MapLayers.getLayers());
+  };
 
   return (
     <>
@@ -337,6 +421,21 @@ const MyMap = () => {
             <div ref={mapRef} id="map"></div>
           </div>
         </div>
+        {/* <select id="actions">
+          <option value="0">Select car:</option>
+          <option value="1">Audi</option>
+          <option value="2">BMW</option>
+          <option value="3">Citroen</option>
+          <option value="4">Ford</option>
+          <option value="5">Honda</option>
+          <option value="6">Jaguar</option>
+          <option value="7">Land Rover</option>
+          <option value="8">Mercedes</option>
+          <option value="9">Mini</option>
+          <option value="10">Nissan</option>
+          <option value="11">Toyota</option>
+          <option value="12">Volvo</option>
+        </select> */}
         <div
           style={{
             display: "flex",
@@ -357,14 +456,16 @@ const MyMap = () => {
                 )
               )
             : null} */}
-          {Entities
-            ? Entities.map((ha, index, stadart) =>
-                ha[0]
-                  ? console.log("baba 3 : " + JSON.stringify(ha)) || (
-                      <Commentaire data={ha} onSubmit={dataForm} />
-                    )
-                  : null
-              )
+          {ShowAddComment
+            ? Entities
+              ? Entities.map((ha, index, stadart) =>
+                  ha[0]
+                    ? console.log("baba 3 : " + JSON.stringify(ha)) || (
+                        <Commentaire data={ha} onSubmit={dataForm} />
+                      )
+                    : null
+                )
+              : null
             : null}
 
           <div class="div-commentaire">
@@ -404,7 +505,7 @@ const MyMap = () => {
                 class="button-28"
                 href="#"
                 type="submit"
-                onClick={showCommentsInMap}
+                onClick={showCommentInMaps}
               >
                 Show In Map
               </button>
@@ -420,21 +521,13 @@ const MyMap = () => {
                 class="button-28"
                 href="#"
                 type="submit"
-                onClick={showCommentsInMap}
+                onClick={reset}
               >
-                Reset
+                Delete All
               </button>
             </div>
           </div>
         </div>
-      </div>
-      <div id="actions" class="esri-widget">
-        <button class="esri-button" style={{ margin: "20px" }} id="add">
-          Add 7 Features
-        </button>
-        <button class="esri-button" id="remove">
-          Remove 7 Features
-        </button>
       </div>
     </>
   );

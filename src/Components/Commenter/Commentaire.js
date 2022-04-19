@@ -93,7 +93,7 @@ export default function Commentaire(props) {
           {/* <h4 style={{ color: "white" }}>Entity : {data[0]["entity"]}</h4> */}
           <li>
             <label style={{ color: "white" }}>
-              Titre <span class="required">*</span>
+              Type <span class="required">*</span>
             </label>
             <input
               type="text"
