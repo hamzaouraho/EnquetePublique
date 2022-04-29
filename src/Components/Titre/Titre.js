@@ -1,9 +1,10 @@
-import React from "react";
+import { React, useState } from "react";
 import "./Titre.css";
 import { FaSearch, FaFilter } from "react-icons/fa";
 import { HiRefresh } from "react-icons/hi";
 
 export default function Titre() {
+  const [Titre, setTitre] = useState("");
   return (
     <div className="titreBox">
       <p className="titre">Enquete Publique</p>
@@ -12,6 +13,9 @@ export default function Titre() {
           type="text"
           placeholder=" Mots clés : Nom, Description, Organisme, ..."
           name="search"
+          onChange={(event) => {
+            setTitre(event.target.value);
+          }}
         />
         <button>
           <FaFilter color="white" size="1rem" />

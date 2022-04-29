@@ -29,7 +29,7 @@ const MyMap = () => {
   const [viewGlob, setviewGlob] = useState(new MapView());
 
   console.log(showResults);
-  // viewGlob.ui.add(document.getElementById("actions"), "top-right");
+
   useEffect(() => {
     console.log("inside");
     const graphicsLayer = new GraphicsLayer();
@@ -170,7 +170,8 @@ const MyMap = () => {
         });
       });
 
-      view.ui.add(sketch, "top-right");
+      view.ui.add([sketch, document.getElementById("actions")], "top-right");
+      // viewGlob.ui.add(document.getElementById("actions"), "top-right");
     });
   }, []);
   console.log("outside 2");
@@ -410,6 +411,143 @@ const MyMap = () => {
     // MapLayers.visible = false;
     // graphicLayers.removeAll();
     // console.log("deleteLayer :" + MapLayers.getLayers());
+    // viewGlob.graphics.removeAll();
+  };
+  const [FileUploaded, setFileUploaded] = useState("");
+  const showFileData = (e) => {
+    setFileUploaded("");
+    e.preventDefault();
+    const reader = new FileReader();
+    console.log("text");
+    reader.onload = (e) => {
+      console.log("text 2");
+      const text = e.target.result;
+      console.log(text);
+      setFileUploaded(text);
+    };
+
+    reader.readAsText(e.target.files[0]);
+  };
+  const [LayerImportLocal, setLayerImportLocal] = useState(new GeoJSONLayer());
+  // const [GrandLat, setGrandLat] = useState(-12);
+  // const [PetitLat, setPetitLat] = useState(0);
+  // const [GrandLong, setGrandLong] = useState(0);
+  // const [PetitLong, setPetitLong] = useState(50);
+  const addGeojsonFileInLayer = () => {
+    // setGrandLat(-12);
+    // setPetitLat(0);
+    // setGrandLong(0);
+    // setPetitLong(50);
+
+    // console.log(
+    //   "charge : " +
+    //     JSON.parse(FileUploaded).features[0].geometry.coordinates[0][0][0]
+    // );
+
+    // JSON.parse(FileUploaded).features.map((entity) => {
+    //   entity.geometry.coordinates[0].map((lat) => {
+    //     // console.log("lat :" + lat[0]);
+    //     if (lat[0] < PetitLat) {
+    //       setPetitLat(lat[0]);
+    //     }
+    //     if (lat[0] > GrandLat) {
+    //       setGrandLat(lat[0]);
+    //     }
+    //     console.log("long :" + lat[1]);
+    //     if (lat[1] < PetitLong) {
+    //       setPetitLong(lat[1]);
+    //     }
+    //     if (lat[1] > GrandLong) {
+    //       setGrandLong(lat[1]);
+    //     }
+    //   });
+    // });
+    // console.log("PetitLat :" + PetitLat + ", GrandLat :" + GrandLat);
+    // console.log("PetitLat :" + PetitLong + ", GrandLat :" + GrandLong);
+    // console.log("data :PetitLat - GrandLat " + (PetitLat - GrandLat));
+    // // viewGlob.zoom = 13;
+    // viewGlob.center = [(PetitLat + GrandLat) / 2, (PetitLong + GrandLong) / 2];
+
+    // if (PetitLat - GrandLat > 0) {
+    //   if (PetitLat - GrandLat < 0.5) {
+    //     viewGlob.zoom = 6;
+    //   } else if (PetitLat - GrandLat < 0.7) {
+    //     viewGlob.zoom = 7;
+    //   } else {
+    //     viewGlob.zoom = 8;
+    //   }
+    // }
+    //  = [      JSON.parse(FileUploaded).features[0].geometry.coordinates[0][0],    ];
+    // MapLayers.remove(LayerImportLocal);
+    // JSON.stringify(LayerImportLocal) === "null"
+    //   ? (MapLayers.visible = true)
+    //   : MapLayers.remove(LayerImportLocal);
+    // MapLayers.remove(LayerImportLocal);
+    const hamzaa = new GeoJSONLayer({
+      url: URL.createObjectURL(
+        new Blob([FileUploaded], { type: "application/json" })
+      ),
+      renderer: {
+        type: "simple",
+        symbol: {
+          type: "simple-fill", // autocasts as new SimpleFillSymbol()
+          color: "#224c7b",
+          // style: "solid",
+          outline: {
+            // autocasts as new SimpleLineSymbol()
+            color: "white",
+            width: 1,
+          },
+          style: "solid",
+          // opacity: 0.33,
+        },
+      },
+      popupTemplate: {
+        title: "Commentaire",
+        content:
+          "<h4> Type : {titre}</h4>  <h4> Commentaire : {commentaire} </h4>  ",
+      },
+    });
+    console.log("hamzaa : " + JSON.stringify(hamzaa));
+    setLayerImportLocal(hamzaa);
+    !!LayerImportLocal ? MapLayers.add(LayerImportLocal) : console.log();
+
+    // LayerImportLocal.visibility = false;
+    console.log("setLayerImportLocal : " + JSON.stringify(LayerImportLocal));
+    console.log("setLayerImportLocal : " + JSON.stringify(LayerImportLocal));
+
+    viewGlob.ui.add(document.getElementById("actions"), "top-right");
+
+    const addBtn = document.getElementById("add");
+
+    addBtn.addEventListener("click", addFeatures);
+
+    // MapLayers.remove(LayerImportLocal);
+
+    // MapLayers.remove(LayerImportLocal);
+    // graphicLayers.clearLayers();
+    // MapLayers.visible = false;
+    // MapLayers.removeAll();
+    // MapLayers.visible = false;
+    // graphicLayers.removeAll();
+    //MapLayers.remove(hamzaa);
+    // MapLayers.removeLayer(hamzaa);
+    // console.log("deleteLayer :" + MapLayers.getLayers());
+    // viewGlob.graphics.removeAll();
+  };
+  function addFeatures() {
+    console.log("babab");
+    setLayerImportLocal(new GeoJSONLayer());
+    setFileUploaded("");
+    MapLayers.remove(LayerImportLocal);
+  }
+  // const addFeatures = (hamzaa) => {
+  //   console.log("salam : " + JSON.stringify(LayerImportLocal));
+
+  // };
+  const [ImportbuttonHide, setImportbuttonHide] = useState(false);
+  const addActiveClass = () => {
+    setImportbuttonHide(!ImportbuttonHide);
   };
 
   return (
@@ -421,20 +559,67 @@ const MyMap = () => {
             <div ref={mapRef} id="map"></div>
           </div>
         </div>
+        <div
+          id="actions"
+          style={{ boxShadow: "0 1px 2px rgb(0 0 0 / 0%)" }}
+          className={"ImportBox"}
+        >
+          <label
+            style={{
+              width: "60px",
+              height: "40px",
+              backgroundColor: "white",
+              color: "#000000b3",
+              padding: "10px",
+              margin: "0px",
+            }}
+            onClick={() => addActiveClass()}
+          >
+            import
+          </label>
+
+          <div
+            // className="HideImportButton"
+            className={
+              ImportbuttonHide ? "ShowImportButton" : "HideImportButton"
+            }
+            // onClick={() => addActiveClass()}
+          >
+            <input
+              type="file"
+              onChange={showFileData}
+              accept=".geojson"
+              style={{
+                // padding: "10px",/
+                margin: "10px",
+              }}
+              // style={{ display: "none" }}
+            />
+            {/* <button class="esri-button" id="add">
+              Add 7 Features
+            </button> */}
+            <div>
+              <button
+                className="button-16"
+                // onClick={() => showFileData()}
+                onClick={() => addGeojsonFileInLayer()}
+              >
+                Charger
+              </button>
+              <button
+                className="button-16"
+                // onClick={() => setImportbuttonHide(!ImportbuttonHide)}
+                // onClick={() => addFeatures()}
+                id="add"
+              >
+                Abondonner
+              </button>
+            </div>
+          </div>
+        </div>
         {/* <select id="actions">
           <option value="0">Select car:</option>
           <option value="1">Audi</option>
-          <option value="2">BMW</option>
-          <option value="3">Citroen</option>
-          <option value="4">Ford</option>
-          <option value="5">Honda</option>
-          <option value="6">Jaguar</option>
-          <option value="7">Land Rover</option>
-          <option value="8">Mercedes</option>
-          <option value="9">Mini</option>
-          <option value="10">Nissan</option>
-          <option value="11">Toyota</option>
-          <option value="12">Volvo</option>
         </select> */}
         <div
           style={{

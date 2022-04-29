@@ -8,6 +8,7 @@ import Etudes from "./Components/Etude/Etudes";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Visualiser from "./Components/Visualiser/Visualiser";
 import Commenter from "./Components/Commenter/Commenter";
+import TestLoadfile from "./TestLoadfile";
 
 function App() {
   return (
@@ -22,13 +23,14 @@ function App() {
             path="enquete-pub"
             element={
               <>
-                <Titre />
+                {/* <Titre /> */}
                 <Etudes />
               </>
             }
           />
-          <Route path="visualiser" element={<Visualiser />} />
-          <Route path="commenter" element={<Commenter />} />
+          <Route path="enquete-pub/visualiser/:id" element={<Visualiser />} />
+          <Route path="enquete-pub/commenter" element={<Commenter />} />
+          <Route path="test" element={<TestLoadfile />} />
         </Routes>
       </BrowserRouter>
       <div className="Footer"></div>
