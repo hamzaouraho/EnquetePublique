@@ -8,16 +8,23 @@ import GraphicsLayer from "@arcgis/core/layers/GraphicsLayer";
 import axios from "axios";
 
 export default function CarteConsolidee() {
-  const [idEtude, setidEtude] = useState();
-  const [etudes, setetudes] = useState([]);
+  const [etudes, setetudes] = useState();
+  const [selectedLayer, setselectedLayer] = useState("");
   const mapRef = useRef(null);
-  const url = "http://127.0.0.1:8000/api/situations";
+  const [url, seturl] = useState("http://127.0.0.1:8000/api/situations");
   const graphicsLayer = new GraphicsLayer();
+  const [MapLayers, setMapLayers] = useState(
+    new Map({
+      basemap: "satellite",
+      layers: [graphicsLayer],
+    })
+  );
+  const [viewGlob, setviewGlob] = useState(new MapView());
 
-  const mapLayer = new Map({
-    basemap: "satellite",
-    layers: [graphicsLayer],
-  });
+  //   const mapLayer = new Map({
+  //     basemap: "satellite",
+  //     layers: [graphicsLayer],
+  //   });
 
   const createGraphic = (graphic, color) => {
     const blob2 = new Blob([graphic], {
@@ -45,7 +52,7 @@ export default function CarteConsolidee() {
       },
     });
     // mapLayer.add(geojsonlayer);
-    mapLayer.add(geojsonlayer2);
+    MapLayers.add(geojsonlayer2);
   };
   function hexToRgb(hex) {
     var result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
@@ -67,48 +74,68 @@ export default function CarteConsolidee() {
     // color += "c9";
     return color;
   }
-  let content = null;
-  let hamza = 3;
-  useEffect(() => {
-    axios.get(url).then((res) => {
+  const showLayerById = (id) => {
+    // etudes
+    //   ? etudes
+    //       .filter((a) => {
+    //         if (a.id == selectedLayer) {
+    //           return a;
+    //         }
+    //       })
+    //       .map((a) => {
+    //         console.log("yoyo : " + JSON.stringify(a.perimetre));
+    //       })
+    //   : console.log();
+    let urldata = "http://127.0.0.1:8000/api/situations/" + id;
+    MapLayers.removeAll();
+    // mapLayer.removeAll();
+    console.log("url : " + urldata);
+    const tab = [];
+    axios.get(urldata).then((res) => {
       res.data.map(
         (a) =>
           createGraphic(a["situation"], getRandomColor()) ||
-          console.log(getRandomColor())
+          JSON.parse(a["situation"]).features.map((graphic) => {
+            graphic.geometry.coordinates[0].map((coordonne) =>
+              tab.push(coordonne)
+            );
+          })
       );
+      console.log("tab : " + tab);
+      viewGlob.goTo({
+        center: [tab],
+        // zoom: 13,
+      });
       //   console.log(res.data[0]["situation"]);
       //   createGraphic(res.data[0]["situation"]);
       //   console.log(res);
     });
+    // console.log("url : " + url);
+  };
+
+  useEffect(() => {
+    setMapLayers(MapLayers);
+    showLayerById("");
+
+    // MapLayers.removeAll();
     axios.get("http://127.0.0.1:8000/api/etudes").then((res) => {
-      res.data.map(
-        (a) =>
-          console.log("etude 1 : " + etudes) ||
-          setetudes(
-            (last) => [...last, a.titre]
-            // () => {
-            //   console.log("etude 2 : ");
-            // }
-          )
-      );
-      //   console.log("test : " + tab);
-      content = etudes
-        ? etudes.map((etude) => <option value="1">etude</option>)
-        : console.log("error in axios get etudes content");
-      //   setetudes(res.data);
+      res.data.map((a) => console.log("etude 1 : " + JSON.stringify(a.titre)));
+      //   console.log("res.data : " + JSON.stringify(res.data));
+      setetudes(res.data);
     });
     // etudes ? console.log("etude : " + etudes) : console.log("");
-    hamza = 2;
+
     const view = new MapView({
       container: mapRef.current,
-      map: mapLayer,
+      map: MapLayers,
       center: [-7.614392, 33.582764],
       zoom: 11,
     });
-  }, [url, hamza]);
+    setviewGlob(view);
+  }, [url]);
   //   etudes ? console.log("etude : " + etudes) : console.log("");
   //   tab ? console.log("etude : " + tab) : console.log("");
-  hamza = 1;
+
   return (
     <>
       <div className="divBox">
@@ -121,9 +148,25 @@ export default function CarteConsolidee() {
           }}
         >
           <div style={{ width: "500px" }}>
-            <select class="form-select" aria-label="Default select example">
-              <option defaultValue>Etudes...</option>
-              {etudes ? <option value="2">{etudes}</option> : console.log()}
+            {console.log("selectedTitle : " + selectedLayer)}
+            <select
+              value={selectedLayer}
+              onChange={(e) =>
+                showLayerById(e.target.value) ||
+                setselectedLayer(e.target.value)
+              }
+              class="form-select"
+            >
+              <option key="" value="">
+                Toutes les Etudes
+              </option>
+              {etudes
+                ? etudes.map((a) => (
+                    <option key={a.id} value={a.id}>
+                      {a.titre}
+                    </option>
+                  ))
+                : console.log("walo")}
             </select>
           </div>
         </div>
