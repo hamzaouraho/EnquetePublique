@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import "./Etude.css";
 import { MdHomeWork } from "react-icons/md";
 import { FaGavel, FaCalendarAlt } from "react-icons/fa";
@@ -11,21 +11,43 @@ export default function Etude(props) {
   const day = parseInt(dd[0] + dd[1]);
   const month = parseInt(dd[3] + dd[4]);
   const year = parseInt(dd[6] + dd[7] + dd[8] + dd[9]);
+  const [dateF, setdateF] = React.useState("");
+  const [restUp, setrestUp] = React.useState(0);
 
-  let df =
-    "0" + day.toString() + "/" + (month + 1).toString() + "/" + year.toString();
-
-  if (day < 10) {
-    df =
-      "0" +
+  useEffect(() => {
+    let df =
       day.toString() +
       "/" +
+      "0" +
       (month + 1).toString() +
       "/" +
       year.toString();
-    if (month + 1 < 10) {
+
+    if (day < 10) {
       df =
         "0" +
+        day.toString() +
+        "/" +
+        (month + 1).toString() +
+        "/" +
+        year.toString();
+      if (month + 1 < 10) {
+        df =
+          "0" +
+          day.toString() +
+          "/" +
+          "0" +
+          (month + 1).toString() +
+          "/" +
+          year.toString();
+      }
+      if (month == 12) {
+        df = "0" + day.toString() + "/" + "01" + "/" + (year + 1).toString();
+      }
+    }
+    setdateF(df);
+    if (month + 1 < 10) {
+      df =
         day.toString() +
         "/" +
         "0" +
@@ -33,46 +55,45 @@ export default function Etude(props) {
         "/" +
         year.toString();
     }
-    if (month == 12) {
-      df = "0" + day.toString() + "/" + "01" + "/" + (year + 1).toString();
+
+    let today = new Date();
+
+    let date =
+      today.getFullYear() +
+      "-" +
+      (today.getMonth() + 1) +
+      "-" +
+      today.getDate();
+    console.log(
+      "date : " +
+        today.getFullYear() +
+        "-" +
+        (today.getMonth() + 1) +
+        "-" +
+        today.getDate()
+    );
+    let done = 0;
+    if (today.getDate() + 1 > day) {
+      done = today.getDate() - day;
+    } else {
+      done = today.getDate() + 30 - day;
     }
-  }
-  if (month + 1 < 10) {
-    df =
-      day.toString() +
-      "/" +
-      "0" +
-      (month + 1).toString() +
-      "/" +
-      year.toString();
-  }
+    setrestUp(done);
+    const Jrest = 30 - done;
 
-  let today = new Date();
+    // const { url, titre } = props.etude[0];
+    setTimeout(() => {
+      const newStyle = {
+        opacity: 1,
+        width: `${(done * 100) / 30}%`,
+      };
 
-  let date =
-    today.getFullYear() + "-" + (today.getMonth() + 1) + "-" + today.getDate();
-  let done = 0;
-  if (today.getMonth() + 1 > day) {
-    done = today.getMonth() + 1 - day;
-  } else {
-    done = today.getMonth() + 1 + 30 - day;
-  }
-
-  const Jrest = 30 - done;
-  const donee = (done * 100) / 30;
+      setStyle(newStyle);
+    }, 200);
+  }, []);
   const styleBotton = {
     textDecoration: "none",
   };
-  // const { url, titre } = props.etude[0];
-  setTimeout(() => {
-    const newStyle = {
-      opacity: 1,
-      width: `${donee}%`,
-    };
-
-    setStyle(newStyle);
-  }, 200);
-
   return (
     <div className="etudeBox">
       <div className="etudeHeader">
@@ -120,17 +141,17 @@ export default function Etude(props) {
                 opacity={0.7}
               />
               Date Fin &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-              <span>{df}</span>
+              <span>{dateF}</span>
             </div>
           </div>
           <div className="progresBar">
             <div className="progress">
               <div className="progress-done" style={style}>
-                {done}J / 30
+                {restUp}J / 30
               </div>
             </div>
 
-            <p>{Jrest} jours restants</p>
+            <p>{30 - restUp} jours restants</p>
           </div>
         </div>
       </div>
@@ -138,7 +159,7 @@ export default function Etude(props) {
         <Link style={styleBotton} to={`visualiser/${props.etude.id}`}>
           <button className="button-29">Visualiser</button>
         </Link>
-        <Link style={styleBotton} to="commenter">
+        <Link style={styleBotton} to={`commenter/${props.etude.id}`}>
           <button className="button-29">Commenter</button>
         </Link>
       </div>

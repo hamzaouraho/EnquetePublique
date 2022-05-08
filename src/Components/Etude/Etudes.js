@@ -86,7 +86,7 @@ export default function Etudes() {
         } else if (
           etude.titre.toLowerCase().includes(Titre.toLowerCase()) &&
           etude.commune.toLowerCase().includes(Commune.toLowerCase()) &&
-          etude.intitule.toLowerCase().includes(Intitule.toLowerCase()) &&
+          etude.agenceUrba.toLowerCase().includes(Intitule.toLowerCase()) &&
           etude.typeDoc.toLowerCase().includes(TypeDoc.toLowerCase())
         ) {
           // console.log("etude.commune : " + etude.commune);
@@ -153,7 +153,7 @@ export default function Etudes() {
                 />
               </div>
               <div className="filterClass">
-                <label for="fname">Intitule</label>
+                <label for="fname">Agence</label>
                 <input
                   type="text"
                   onChange={(event) => {

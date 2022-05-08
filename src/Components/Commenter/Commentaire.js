@@ -8,7 +8,7 @@ export default function Commentaire(props) {
   const [FormData, setFormData] = useState({
     // coordonnee: "",
     comment: "",
-    titre: "",
+    // titre: "",
     data: props.data,
   });
   // setFormData({
@@ -21,19 +21,19 @@ export default function Commentaire(props) {
     setFormData({
       // coordonnee: FormData.coordonnee,
       comment: e.target.value,
-      titre: FormData.titre,
+      // titre: FormData.titre,
       data: props.data,
     });
   };
 
-  const handleTitre = (e) => {
-    setFormData({
-      // coordonnee: FormData.coordonnee,
-      comment: FormData.comment,
-      titre: e.target.value,
-      data: props.data,
-    });
-  };
+  // const handleTitre = (e) => {
+  //   setFormData({
+  //     // coordonnee: FormData.coordonnee,
+  //     comment: FormData.comment,
+  //     titre: e.target.value,
+  //     data: props.data,
+  //   });
+  // };
   const hadelSubmit = (e) => {
     e.preventDefault();
     props.onSubmit(FormData);
@@ -43,7 +43,7 @@ export default function Commentaire(props) {
   return (
     <div
       style={{
-        margin: "0px 20px ",
+        margin: "0px 20px 20px 20px",
         // backgroundColor: "#17a2b887",
         backgroundColor: "#a3cad2",
         padding: "5px",
@@ -68,31 +68,8 @@ export default function Commentaire(props) {
             width: "350px",
           }}
         >
-          {/* <li> */}
-          {/* {data.map((test) => test["lat"] + ", " + test["long"])} */}
-          {/* <label>
-              Coordonnée <span class="required">*</span>
-            </label> */}
-          {/* <textarea
-              rows="4"
-              cols="50"
-              readOnly
-              name="field5"
-              id="field5"
-              class="field-long field-textarea"
-              value={data.map(
-                (test) =>
-                  "X : " +
-                  test["lat"].toFixed(2) +
-                  ", Y : " +
-                  test["long"].toFixed(2) +
-                  "\n"
-              )}
-            ></textarea> */}
-          {/* </li> */}
-          {/* <h4 style={{ color: "white" }}>Entity : {data[0]["entity"]}</h4> */}
           <li>
-            <label style={{ color: "white" }}>
+            {/* <label style={{ color: "white" }}>
               Type <span class="required">*</span>
             </label>
             <input
@@ -101,7 +78,7 @@ export default function Commentaire(props) {
               class="field-long"
               placeholder="Titre"
               onChange={handleTitre}
-            />
+            /> */}
             <label style={{ color: "white" }}>
               Your Message <span class="required">*</span>
             </label>
@@ -114,42 +91,6 @@ export default function Commentaire(props) {
               onChange={handleName}
             ></textarea>
           </li>
-          {/* <li>
-            <label>
-              Full Name <span class="required">*</span>
-            </label>
-            <input
-              type="text"
-              name="field1"
-              class="field-divided"
-              placeholder="First"
-            />{" "}
-            <input
-              type="text"
-              name="field2"
-              class="field-divided"
-              placeholder="Last"
-            />
-          </li> */}
-          {/* <li>
-            <label>
-              Email <span class="required">*</span>
-            </label>
-            <input
-              type="email"
-              name="field3"
-              class="field-long"
-              onChange={handleEmail}
-            />
-          </li> */}
-          {/* <li>
-            <label>Subject</label>
-            <select name="field4" class="field-select">
-              <option value="Advertise">Advertise</option>
-              <option value="Partnership">Partnership</option>
-              <option value="General Question">General</option>
-            </select>
-          </li> */}
         </ul>
         <div
           style={{
@@ -181,29 +122,6 @@ export default function Commentaire(props) {
           >
             Ajouter
           </button>
-          {/* <button
-            style={{
-              margin: "17px",
-              width: "110px",
-              fontSize: "16px",
-              backgroundImage:
-                "radial-gradient(100% 100% at 100% 0,#406882 0,#406882 100%)",
-            }}
-            class="button-29"
-            href="#"
-            onClick={() =>
-              setFormData({
-                // coordonnee: FormData.coordonnee,
-                comment: FormData.comment,
-                titre: FormData.titre,
-                data: props.data,
-                button: "delete",
-              })
-            }
-            type="submit"
-          >
-            Supprimer
-          </button> */}
         </div>
       </form>
     </div>

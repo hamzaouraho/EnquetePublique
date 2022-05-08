@@ -14,8 +14,9 @@ import Commentaire from "../Commenter/Commentaire";
 import NavbarMenu from "./../NavBarMenu/NavbarMenu";
 import CommentaireTest from "./../Commenter/CommentaireTest";
 import { usePreviousProps } from "@mui/utils";
+import SaveCommentaire from "../Commenter/SaveCommentaire";
 
-const MyMap = () => {
+const MyMap = (props) => {
   const mapRef = useRef(null);
   const [showResults, setShowResults] = useState(false);
   const [ChotuseEffect, setChotuseEffect] = useState(true);
@@ -27,7 +28,8 @@ const MyMap = () => {
     new GeoJSONLayer()
   );
   const [viewGlob, setviewGlob] = useState(new MapView());
-
+  const [saveRequeteButton, setsaveRequeteButton] = useState(false);
+  const [DataGeojson, setDataGeojson] = useState("");
   console.log(showResults);
 
   useEffect(() => {
@@ -81,6 +83,7 @@ const MyMap = () => {
             circle: false,
             square: false,
             rectangle: false,
+            line: false,
           },
           selectionTools: {
             "lasso-selection": false,
@@ -175,6 +178,7 @@ const MyMap = () => {
     });
   }, []);
   console.log("outside 2");
+
   let [Entities, setEntities] = useState();
   let [FinalEntities, setFinalEntities] = useState([]);
 
@@ -224,9 +228,9 @@ const MyMap = () => {
         (a) =>
           (geojsonFile =
             geojsonFile +
-            '{"type": "Feature","properties": {"titre": "' +
-            a["titre"] +
-            '", "commentaire" : "' +
+            '{"type": "Feature","properties": {"commentaire": "' +
+            // a["titre"] +
+            // '", "commentaire" : "' +
             a["comment"] +
             '"},"geometry": {"type": "Polygon","coordinates": [[') |
           a["data"].map(
@@ -255,6 +259,53 @@ const MyMap = () => {
       element.click()
     );
 
+    // const entityBlob = new Blob(
+    //   [
+    //     // FinalEntities
+    //     //   ? FinalEntities.map(
+    //     //       (a) => '{"type": "Feature","properties": {"commentaire": ',
+    //     //       FinalEntities ? a["comment"] : null,
+    //     //       " ",
+    //     //       '},"geometry": {"type": "Polygon","coordinates": [[',
+    //     //       a["data"].map((aa) => ("[", aa["lat"], "],[", aa["long"], "],")),
+    //     //       "]]}}"
+    //     //     )
+    //     //   : null,
+    //     "",
+    //   ],
+    //   { type: "text/plain" }
+    // );
+    // const endBlob = new Blob(["]}"], { type: "text/plain" });
+  };
+
+  const getGeojson = () => {
+    const element = document.createElement("a");
+
+    let geojsonFile = '{"type": "FeatureCollection","features": [';
+    Promise.all(
+      FinalEntities.map(
+        (a) =>
+          (geojsonFile =
+            geojsonFile +
+            '{"type": "Feature","properties": {"commentaire": "' +
+            // a["titre"] +
+            // '", "commentaire" : "' +
+            a["comment"] +
+            '"},"geometry": {"type": "Polygon","coordinates": [[') |
+          a["data"].map(
+            (aa) =>
+              (geojsonFile =
+                geojsonFile +
+                "[" +
+                webMercatorUtils.xyToLngLat(aa["lat"], aa["long"])[0] +
+                ", " +
+                webMercatorUtils.xyToLngLat(aa["lat"], aa["long"])[1] +
+                "],")
+          ) |
+          (geojsonFile = geojsonFile.slice(0, -1) + "]]}},")
+      ),
+      (geojsonFile = geojsonFile.slice(0, -1) + "]}")
+    ).then(() => setDataGeojson(geojsonFile));
     // const entityBlob = new Blob(
     //   [
     //     // FinalEntities
@@ -406,6 +457,7 @@ const MyMap = () => {
     deleteLayer();
     setChotuseEffect([]);
   };
+  const saveButton = () => {};
   const deleteLayer = () => {
     // MapLayers.removeAll();
     // MapLayers.visible = false;
@@ -418,14 +470,14 @@ const MyMap = () => {
     setFileUploaded("");
     e.preventDefault();
     const reader = new FileReader();
-    console.log("text");
+
     reader.onload = (e) => {
-      console.log("text 2");
+      // console.log("text 2");
       const text = e.target.result;
-      console.log(text);
+      // console.log(text);
       setFileUploaded(text);
     };
-
+    console.log("FileUploaded 1 :" + FileUploaded);
     reader.readAsText(e.target.files[0]);
   };
   const [LayerImportLocal, setLayerImportLocal] = useState(new GeoJSONLayer());
@@ -434,55 +486,12 @@ const MyMap = () => {
   // const [GrandLong, setGrandLong] = useState(0);
   // const [PetitLong, setPetitLong] = useState(50);
   const addGeojsonFileInLayer = () => {
-    // setGrandLat(-12);
-    // setPetitLat(0);
-    // setGrandLong(0);
-    // setPetitLong(50);
+    const tab = [];
+    JSON.parse(FileUploaded).features.map((graphic) => {
+      graphic.geometry.coordinates[0].map((coordonne) => tab.push(coordonne));
+    });
 
-    // console.log(
-    //   "charge : " +
-    //     JSON.parse(FileUploaded).features[0].geometry.coordinates[0][0][0]
-    // );
-
-    // JSON.parse(FileUploaded).features.map((entity) => {
-    //   entity.geometry.coordinates[0].map((lat) => {
-    //     // console.log("lat :" + lat[0]);
-    //     if (lat[0] < PetitLat) {
-    //       setPetitLat(lat[0]);
-    //     }
-    //     if (lat[0] > GrandLat) {
-    //       setGrandLat(lat[0]);
-    //     }
-    //     console.log("long :" + lat[1]);
-    //     if (lat[1] < PetitLong) {
-    //       setPetitLong(lat[1]);
-    //     }
-    //     if (lat[1] > GrandLong) {
-    //       setGrandLong(lat[1]);
-    //     }
-    //   });
-    // });
-    // console.log("PetitLat :" + PetitLat + ", GrandLat :" + GrandLat);
-    // console.log("PetitLat :" + PetitLong + ", GrandLat :" + GrandLong);
-    // console.log("data :PetitLat - GrandLat " + (PetitLat - GrandLat));
-    // // viewGlob.zoom = 13;
-    // viewGlob.center = [(PetitLat + GrandLat) / 2, (PetitLong + GrandLong) / 2];
-
-    // if (PetitLat - GrandLat > 0) {
-    //   if (PetitLat - GrandLat < 0.5) {
-    //     viewGlob.zoom = 6;
-    //   } else if (PetitLat - GrandLat < 0.7) {
-    //     viewGlob.zoom = 7;
-    //   } else {
-    //     viewGlob.zoom = 8;
-    //   }
-    // }
-    //  = [      JSON.parse(FileUploaded).features[0].geometry.coordinates[0][0],    ];
-    // MapLayers.remove(LayerImportLocal);
-    // JSON.stringify(LayerImportLocal) === "null"
-    //   ? (MapLayers.visible = true)
-    //   : MapLayers.remove(LayerImportLocal);
-    // MapLayers.remove(LayerImportLocal);
+    console.log("FileUploaded : " + FileUploaded);
     const hamzaa = new GeoJSONLayer({
       url: URL.createObjectURL(
         new Blob([FileUploaded], { type: "application/json" })
@@ -491,12 +500,10 @@ const MyMap = () => {
         type: "simple",
         symbol: {
           type: "simple-fill", // autocasts as new SimpleFillSymbol()
-          color: "#224c7b",
-          // style: "solid",
+          color: [107, 249, 253, 0.3],
           outline: {
-            // autocasts as new SimpleLineSymbol()
-            color: "white",
-            width: 1,
+            width: 2,
+            color: [107, 249, 253],
           },
           style: "solid",
           // opacity: 0.33,
@@ -508,17 +515,26 @@ const MyMap = () => {
           "<h4> Type : {titre}</h4>  <h4> Commentaire : {commentaire} </h4>  ",
       },
     });
-    console.log("hamzaa : " + JSON.stringify(hamzaa));
     setLayerImportLocal(hamzaa);
-    !!LayerImportLocal ? MapLayers.add(LayerImportLocal) : console.log();
-
+    console.log("hamzaa : " + JSON.stringify(hamzaa));
+    console.log("LayerImportLocal : " + JSON.stringify(LayerImportLocal));
+    // MapLayers.add(LayerImportLocal);
     // LayerImportLocal.visibility = false;
-    console.log("setLayerImportLocal : " + JSON.stringify(LayerImportLocal));
-    console.log("setLayerImportLocal : " + JSON.stringify(LayerImportLocal));
+    // console.log("setLayerImportLocal : " + JSON.stringify(LayerImportLocal));
+    // console.log("setLayerImportLocal : " + JSON.stringify(LayerImportLocal));
 
     viewGlob.ui.add(document.getElementById("actions"), "top-right");
 
     const addBtn = document.getElementById("add");
+    Promise.all(tab).then(() => {
+      // !!LayerImportLocal ? MapLayers.add(LayerImportLocal) : console.log();
+      MapLayers.add(LayerImportLocal);
+      setlayer();
+      viewGlob.goTo({
+        center: [tab],
+        // zoom: 13,
+      });
+    });
 
     addBtn.addEventListener("click", addFeatures);
 
@@ -535,11 +551,16 @@ const MyMap = () => {
     // console.log("deleteLayer :" + MapLayers.getLayers());
     // viewGlob.graphics.removeAll();
   };
+  function setlayer() {
+    console.log("yayayay : " + JSON.stringify(LayerImportLocal));
+    MapLayers.add(LayerImportLocal);
+  }
   function addFeatures() {
     console.log("babab");
-    setLayerImportLocal(new GeoJSONLayer());
-    setFileUploaded("");
+    // setLayerImportLocal(new GeoJSONLayer());
+
     MapLayers.remove(LayerImportLocal);
+    setFileUploaded("");
   }
   // const addFeatures = (hamzaa) => {
   //   console.log("salam : " + JSON.stringify(LayerImportLocal));
@@ -548,6 +569,10 @@ const MyMap = () => {
   const [ImportbuttonHide, setImportbuttonHide] = useState(false);
   const addActiveClass = () => {
     setImportbuttonHide(!ImportbuttonHide);
+  };
+  const getSaveButtonValue = (value) => {
+    console.log("ana jay mn SaveComponent : " + value);
+    setsaveRequeteButton(value);
   };
 
   return (
@@ -663,53 +688,45 @@ const MyMap = () => {
             </div>
             <div style={{ display: "flex", justifyContent: "center" }}>
               <button
-                style={{
-                  margin: "10px",
-                  width: "150px",
-                  height: "50px",
-                  fontSize: "16px",
-                  backgroundImage:
-                    "radial-gradient(100% 100% at 100% 0,#224c7b 0,#224c7b 100%)",
-                }}
-                class="button-28"
-                href="#"
+                class="button-28 buttonStyle"
                 type="submit"
                 onClick={downloadTxtFile}
               >
                 Export GeoJson
               </button>
               <button
-                style={{
-                  margin: "10px",
-                  width: "150px",
-                  height: "50px",
-                  fontSize: "16px",
-                  backgroundImage:
-                    "radial-gradient(100% 100% at 100% 0,#224c7b 0,#224c7b 100%)",
-                }}
-                class="button-28"
-                href="#"
+                class="button-28 buttonStyle"
                 type="submit"
                 onClick={showCommentInMaps}
               >
                 Show In Map
               </button>
               <button
-                style={{
-                  margin: "10px",
-                  width: "150px",
-                  height: "50px",
-                  fontSize: "16px",
-                  backgroundImage:
-                    "radial-gradient(100% 100% at 100% 0,#224c7b 0,#224c7b 100%)",
-                }}
-                class="button-28"
-                href="#"
+                class="button-28 buttonStyle"
                 type="submit"
                 onClick={reset}
               >
                 Delete All
               </button>
+              <button
+                class="button-28 buttonStyle"
+                href="#"
+                type="submit"
+                onClick={() => (
+                  getGeojson(), setsaveRequeteButton(!saveRequeteButton)
+                )}
+              >
+                Save
+              </button>
+            </div>
+            <div>
+              {saveRequeteButton ? (
+                <SaveCommentaire
+                  saveButtonV={(value) => setsaveRequeteButton(value)}
+                  data={DataGeojson}
+                  id={props.id}
+                />
+              ) : null}
             </div>
           </div>
         </div>

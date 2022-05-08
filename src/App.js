@@ -9,6 +9,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Visualiser from "./Components/Visualiser/Visualiser";
 import Commenter from "./Components/Commenter/Commenter";
 import TestLoadfile from "./TestLoadfile";
+import CarteConsolidee from "./Components/CarteConsolidee/CarteConsolidee";
 
 function App() {
   return (
@@ -29,8 +30,9 @@ function App() {
             }
           />
           <Route path="enquete-pub/visualiser/:id" element={<Visualiser />} />
-          <Route path="enquete-pub/commenter" element={<Commenter />} />
+          <Route path="enquete-pub/commenter/:id" element={<Commenter />} />
           <Route path="test" element={<TestLoadfile />} />
+          <Route path="carte-consolidee" element={<CarteConsolidee />} />
         </Routes>
       </BrowserRouter>
       <div className="Footer"></div>

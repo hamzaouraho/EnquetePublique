@@ -3,7 +3,7 @@ import "./Commentaire.css";
 
 export default function CommentaireTest(props) {
   const data = props.data;
-  //   console.log("salem : " + JSON.stringify(props.data));
+  // console.log("salem : " + JSON.stringify(props.data));
   return (
     <div
       style={{
@@ -28,7 +28,7 @@ export default function CommentaireTest(props) {
             width: "350px",
           }}
         >
-          <li style={{ display: "flex" }}>
+          {/* <li style={{ display: "flex" }}>
             <label
               style={{
                 width: "150px",
@@ -46,7 +46,7 @@ export default function CommentaireTest(props) {
               readOnly
               value={props.data["titre"]}
             ></input>
-          </li>
+          </li> */}
           <li style={{ display: "flex" }}>
             <label
               style={{
