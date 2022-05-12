@@ -30,6 +30,8 @@ const MyMap = (props) => {
   const [viewGlob, setviewGlob] = useState(new MapView());
   const [saveRequeteButton, setsaveRequeteButton] = useState(false);
   const [DataGeojson, setDataGeojson] = useState("");
+  const [toreloadJSX, settoreloadJSX] = useState("");
+  const [probcreatGraphZoomIn, setprobcreatGraphZoomIn] = useState("");
   console.log(showResults);
 
   useEffect(() => {
@@ -205,11 +207,17 @@ const MyMap = (props) => {
 
     // console.log("******* : data : " + JSON.stringify(data));
     if (data.button === "add") {
+      reset2();
       console.log("haniya");
       deleteEntity();
       setShowAddComment(false);
       deleteAllGraphics();
       viewGlob.graphics.removeAll();
+      console.log(
+        "[...FinalEntities, data] : " + JSON.stringify([...FinalEntities, data])
+      );
+      showCommentInMaps([...FinalEntities, data]);
+
       // console.log("FinalEntities before add : " + JSON.parse(FinalEntities));
       setFinalEntities((oldArray) => [...oldArray, data]);
 
@@ -387,9 +395,9 @@ const MyMap = (props) => {
 
     // URL reference to the blob
   };
-  const showCommentInMaps = () => {
-    console.log("FinalEntities : " + JSON.stringify(FinalEntities));
-    FinalEntities?.map((entities) => {
+  const showCommentInMaps = (dataaa) => {
+    // console.log("Show in map dataa: " + JSON.stringify(dataaa));
+    dataaa?.map((entities) => {
       const hamza = new Graphic({
         geometry: {
           type: "polygon", // autocasts as new Polygon()
@@ -441,7 +449,7 @@ const MyMap = (props) => {
             "</h4>  ",
         },
       });
-      console.log("rayaaah" + JSON.stringify(hamza));
+      // console.log("rayaaah" + JSON.stringify(hamza));
 
       viewGlob.graphics.add(hamza);
     });
@@ -450,6 +458,15 @@ const MyMap = (props) => {
   };
   const reset = () => {
     setFinalEntities([]);
+    viewGlob.graphics.removeAll();
+
+    // console.log("finalentities : " + JSON.stringify(FinalEntities));
+    // console.log("setChotuseEffect : " + JSON.stringify(setChotuseEffect));
+    deleteLayer();
+    setChotuseEffect([]);
+  };
+  let reset2 = () => {
+    // setFinalEntities([]);
     viewGlob.graphics.removeAll();
 
     // console.log("finalentities : " + JSON.stringify(FinalEntities));
@@ -574,6 +591,68 @@ const MyMap = (props) => {
     console.log("ana jay mn SaveComponent : " + value);
     setsaveRequeteButton(value);
   };
+  const deleteComment = (index, type) => {
+    // deleteAllGraphics();
+
+    viewGlob.graphics.removeAll();
+
+    if (type == "zoomin") {
+      // let vzar = FinalEntities;
+      let tab = [];
+
+      tab
+        ? FinalEntities[index].data.map((a) => {
+            tab.push(webMercatorUtils.xyToLngLat(a.lat, a.long));
+
+            console.log(webMercatorUtils.xyToLngLat(a.lat, a.long));
+          })
+        : console.log();
+
+      tab
+        ? console.log("tab : " + tab) ||
+          viewGlob.goTo({
+            center: [tab],
+            // zoom: 13,
+          })
+        : console.log();
+      // showCommentInMaps(FinalEntities);
+
+      // settoreloadJSX("" + Math.random());
+      console.log("zoomin button");
+    } else if (type == "delete") {
+      let vzar = FinalEntities.splice(index, 1);
+      settoreloadJSX("" + Math.random());
+      console.log("delete button");
+    }
+    showCommentInMaps(FinalEntities);
+
+    // settoreloadJSX("" + Math.random());
+    // FinalEntities
+    //   ? console.log("apres : FinalEntities :" + JSON.stringify(FinalEntities))
+    //   : console.log();
+  };
+
+  console.log("toreloadJSX : " + toreloadJSX);
+  const datazoomin = (v) => {
+    console.log(v.data);
+    FinalEntities.filter((a, i) => {
+      if (a.data == v.data.data) {
+        console.log("wakha 3la mok : " + i + ", action : " + v.action);
+        // setprobcreatGraphZoomIn(v.data.data);
+        deleteComment(i, v.action);
+      }
+    });
+  };
+  const datadeleteComment = (v) => {
+    console.log(v.data);
+    FinalEntities.filter((a, i) => {
+      if (a.data == v.data.data) {
+        console.log("wakha 3la mok : " + i + ", action : " + v.action);
+        // setprobcreatGraphZoomIn(v.data.data);
+        deleteComment(i, v.action);
+      }
+    });
+  };
 
   return (
     <>
@@ -681,9 +760,35 @@ const MyMap = (props) => {
           <div class="div-commentaire">
             <h6>Commentaire</h6>
             <div style={{ overflow: "auto", height: "325px" }}>
-              {FinalEntities
-                ? // console.log("baba 2 : " + JSON.stringify(FinalEntities)) |
-                  FinalEntities.map((data) => <CommentaireTest data={data} />)
+              {JSON.stringify(FinalEntities) != "[]"
+                ? FinalEntities.map((data) => (
+                    <CommentaireTest
+                      data={data}
+                      zoomin={datazoomin}
+                      deleteComment={datadeleteComment}
+                      CommentActionn={(v) => {
+                        // if (probcreatGraphZoomIn != v.data.data) {
+                        //   console.log(
+                        //     "probcreatGraphZoomIn : " + probcreatGraphZoomIn
+                        //   );
+                        //   console.log("v.data.data : " + v.data.data);
+                        //   FinalEntities.filter((a, i) => {
+                        //     if (a.data == v.data.data && v.action) {
+                        //       console.log(
+                        //         "wakha 3la mok : " +
+                        //           i +
+                        //           ", action : " +
+                        //           v.action
+                        //       );
+                        //       setprobcreatGraphZoomIn(v.data.data);
+                        //       deleteComment(i, v.action);
+                        //     }
+                        //   }) ||
+                        //     console.log("jatt dataa : " + JSON.stringify(v));
+                        // }
+                      }}
+                    />
+                  ))
                 : null}
             </div>
             <div style={{ display: "flex", justifyContent: "center" }}>

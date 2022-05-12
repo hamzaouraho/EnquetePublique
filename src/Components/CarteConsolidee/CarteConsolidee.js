@@ -3,16 +3,28 @@ import "./CarteConsolidee.css";
 import Map from "@arcgis/core/Map";
 import MapView from "@arcgis/core/views/MapView";
 import GeoJSONLayer from "@arcgis/core/layers/GeoJSONLayer";
+import { AiFillFilter } from "react-icons/ai";
+import { FaFileExport } from "react-icons/fa";
+import { PDFExport, savePDF } from "@progress/kendo-react-pdf";
 // import Sketch from "@arcgis/core/widgets/Sketch";
 import GraphicsLayer from "@arcgis/core/layers/GraphicsLayer";
 import axios from "axios";
+import { exportPDF } from "@progress/kendo-drawing";
+import ihamzaCV from "./cvPhoto.png";
+import logo from "./logo.png";
 
 export default function CarteConsolidee() {
   const [etudes, setetudes] = useState();
   const [selectedLayer, setselectedLayer] = useState("");
+  const [showFilter, setshowFilter] = useState(false);
+  const [NomCitoyen, setNomCitoyen] = useState("");
+  const [TFCitoyen, setTFCitoyen] = useState("");
+  const [CommentaireCitoyen, setCommentaireCitoyen] = useState("");
+  const [exportData, setexportData] = useState("");
   const mapRef = useRef(null);
   const [url, seturl] = useState("http://127.0.0.1:8000/api/situations");
   const graphicsLayer = new GraphicsLayer();
+  const pdfExportComponent = React.useRef(null);
   const [MapLayers, setMapLayers] = useState(
     new Map({
       basemap: "satellite",
@@ -75,32 +87,54 @@ export default function CarteConsolidee() {
     return color;
   }
   const showLayerById = (id) => {
-    // etudes
-    //   ? etudes
-    //       .filter((a) => {
-    //         if (a.id == selectedLayer) {
-    //           return a;
-    //         }
-    //       })
-    //       .map((a) => {
-    //         console.log("yoyo : " + JSON.stringify(a.perimetre));
-    //       })
-    //   : console.log();
-    let urldata = "http://127.0.0.1:8000/api/situations/" + id;
+    let urldata = "";
+    urldata = "http://127.0.0.1:8000/api/situations/" + id;
     MapLayers.removeAll();
     // mapLayer.removeAll();
-    console.log("url : " + urldata);
+    // console.log("url : " + urldata);
     const tab = [];
+    console.log("salam : " + id);
+    setexportData("");
     axios.get(urldata).then((res) => {
-      res.data.map(
-        (a) =>
+      res.data
+        .filter((a) => {
+          console.log("a.nom.toLowerCase() : " + a.nom.toLowerCase() + ", ");
+          if (TFCitoyen == "" && CommentaireCitoyen == "" && NomCitoyen == "") {
+            return a;
+          } else if (
+            a.nom.toLowerCase().includes(NomCitoyen.toLowerCase()) &&
+            a.tf.toLowerCase().includes(TFCitoyen.toLowerCase()) &&
+            a.commentaire
+              .toLowerCase()
+              .includes(CommentaireCitoyen.toLowerCase())
+          ) {
+            // console.log("etude.commune : " + etude.commune);
+            return a;
+          }
+        })
+        .map((a) =>
           createGraphic(a["situation"], getRandomColor()) ||
           JSON.parse(a["situation"]).features.map((graphic) => {
-            graphic.geometry.coordinates[0].map((coordonne) =>
-              tab.push(coordonne)
+            graphic.geometry.coordinates[0].map(
+              (coordonne) =>
+                console.log("coordonnee : " + coordonne) || tab.push(coordonne)
             );
-          })
-      );
+          }) ||
+          a
+            ? JSON.stringify(
+                JSON.parse(a.situation).features.map((a) =>
+                  setexportData((oldArray) =>
+                    oldArray != ""
+                      ? oldArray + "," + JSON.stringify(a)
+                      : '{"type": "FeatureCollection","features": [' +
+                        JSON.stringify(a)
+                  )
+                )
+              )
+            : null
+        );
+      setexportData((oldArray) => oldArray + "]}");
+      //   console.log("res.data : " + JSON.stringify(res.data));
       console.log("tab : " + tab);
       viewGlob.goTo({
         center: [tab],
@@ -133,8 +167,31 @@ export default function CarteConsolidee() {
     });
     setviewGlob(view);
   }, [url]);
+  console.log("salam bro cv : " + exportData);
   //   etudes ? console.log("etude : " + etudes) : console.log("");
   //   tab ? console.log("etude : " + tab) : console.log("");
+  const exportFile = () => {
+    const element = document.createElement("a");
+    element.href = URL.createObjectURL(
+      new Blob([JSON.parse(JSON.stringify(exportData))], {
+        type: "text/plain",
+      })
+    );
+    element.download = "File.geojson";
+    document.body.appendChild(element);
+    element.click();
+  };
+  const exportPDFWithMethod = () => {
+    let element = document.querySelector(".k-grid") || document.body;
+    savePDF(element, {
+      paperSize: "A4",
+    });
+  };
+  const exportPDFWithComponent = () => {
+    if (pdfExportComponent.current) {
+      pdfExportComponent.current.save();
+    }
+  };
 
   return (
     <>
@@ -144,11 +201,11 @@ export default function CarteConsolidee() {
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
-            margin: "25px",
+            flexDirection: "column",
+            margin: "25px 25px 5px 25px",
           }}
         >
-          <div style={{ width: "500px" }}>
-            {console.log("selectedTitle : " + selectedLayer)}
+          <div style={{ width: "500px", display: "flex" }}>
             <select
               value={selectedLayer}
               onChange={(e) =>
@@ -166,9 +223,61 @@ export default function CarteConsolidee() {
                       {a.titre}
                     </option>
                   ))
-                : console.log("walo")}
+                : null}
             </select>
+            <button
+              className="iconButton"
+              onClick={() => setshowFilter(!showFilter)}
+            >
+              <AiFillFilter color="dark" size="1rem" />
+            </button>
+            <button className="iconButton" onClick={exportFile}>
+              <FaFileExport color="dark" size="1.2rem" />
+            </button>
+            {/* <AiFillFilter></AiFillFilter> */}
           </div>
+          {showFilter ? (
+            <div style={{ marginTop: "18px" }}>
+              <div class="form-row ">
+                <div class="form-group col-md-4 col-sm-6">
+                  <label for="input4">Nom</label>
+                  <input
+                    type="text"
+                    class="form-control"
+                    placeholder="Nom"
+                    onChange={(e) =>
+                      setNomCitoyen(e.target.value) ||
+                      showLayerById(selectedLayer)
+                    }
+                  />
+                </div>
+                <div class="form-group col-md-4 col-sm-6">
+                  <label for="input4">Titre Foncier</label>
+                  <input
+                    type="text"
+                    class="form-control"
+                    placeholder="TF"
+                    onChange={(e) =>
+                      setTFCitoyen(e.target.value) ||
+                      showLayerById(selectedLayer)
+                    }
+                  />
+                </div>
+                <div class="form-group col-md-4 col-sm-6">
+                  <label for="input4">Commentaire</label>
+                  <input
+                    type="text"
+                    class="form-control"
+                    placeholder="Commentaire"
+                    onChange={(e) =>
+                      setCommentaireCitoyen(e.target.value) ||
+                      showLayerById(selectedLayer)
+                    }
+                  />
+                </div>
+              </div>
+            </div>
+          ) : null}
         </div>
         <div>
           <div
@@ -185,6 +294,63 @@ export default function CarteConsolidee() {
           </div>
         </div>
       </div>
+
+      <PDFExport ref={pdfExportComponent} paperSize="A4">
+        <div
+          style={{
+            margin: "5px 100px",
+          }}
+        >
+          <img src={logo} />
+        </div>
+        <div
+          style={{
+            margin: "5px 100px",
+            fontSize: "8px",
+          }}
+        >
+          <div>
+            <div>
+              <table
+                style={{
+                  tableLayout: "fixed",
+                  width: "100%",
+                  textAlign: "center",
+                }}
+              >
+                <tr style={{ backgroundColor: "#d9d9d9", color: "white" }}>
+                  <th colspan="4">Requete N°</th>
+
+                  <th colspan="8">Situation</th>
+                </tr>
+                <tr>
+                  <td colspan="2">Page 3 & 3</td>
+                  <td colspan="2">MR. A. BOUCHOUIREB</td>
+                  <td rowspan="7">
+                    P A - E DI TI O N E N Q U E T E P U B LI Q U E-
+                  </td>
+                  <td rowspan="7" colspan="7">
+                    <img src={ihamzaCV} />
+                  </td>
+                </tr>
+                <tr>
+                  <td colspan="4">T.F. 187100/12</td>
+                </tr>
+                <tr>
+                  <td colspan="4">
+                    •S’oppose à la voie d’aménagement «LA09». •S’oppose au tracé
+                    du TGV.
+                  </td>
+                </tr>
+                <tr>
+                  <td colspan="4" rowspan="4"></td>
+                </tr>
+              </table>
+            </div>
+          </div>
+        </div>
+      </PDFExport>
+      <button onClick={exportPDFWithComponent}>Export pdf </button>
     </>
   );
 }

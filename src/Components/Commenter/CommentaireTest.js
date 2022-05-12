@@ -1,9 +1,24 @@
 import React, { useState } from "react";
-import "./Commentaire.css";
 
-export default function CommentaireTest(props) {
-  const data = props.data;
+import "./Commentaire.css";
+import { BiZoomIn } from "react-icons/bi";
+import { MdDelete } from "react-icons/md";
+export default function CommentaireTest(props, CommentActionn) {
+  let data = props.data;
+  const [CommentAction, setCommentAction] = useState({
+    action: "",
+    data: props.data,
+  });
+  props.CommentActionn(CommentAction);
   // console.log("salem : " + JSON.stringify(props.data));
+  const zoomin = (e) => {
+    e.preventDefault();
+    props.zoomin({ action: "zoomin", data: props.data });
+  };
+  const deleteComment = (e) => {
+    e.preventDefault();
+    props.deleteComment({ action: "delete", data: props.data });
+  };
   return (
     <div
       style={{
@@ -19,6 +34,8 @@ export default function CommentaireTest(props) {
       }}
     >
       <form style={{ display: "flex" }}>
+        {/* <button> */}
+
         <ul
           class="form-style-1"
           style={{
@@ -28,25 +45,6 @@ export default function CommentaireTest(props) {
             width: "350px",
           }}
         >
-          {/* <li style={{ display: "flex" }}>
-            <label
-              style={{
-                width: "150px",
-                display: "flex",
-                justifyContent: "center",
-                alignItems: "center",
-              }}
-            >
-              Type
-            </label>
-            <input
-              type="text"
-              name="field1"
-              class="field-long"
-              readOnly
-              value={props.data["titre"]}
-            ></input>
-          </li> */}
           <li style={{ display: "flex" }}>
             <label
               style={{
@@ -68,6 +66,27 @@ export default function CommentaireTest(props) {
             ></textarea>
           </li>
         </ul>
+        <div
+          style={{
+            display: "flex",
+            flexDirection: "column",
+            justifyContent: "space-between",
+            margin: "10px",
+          }}
+        >
+          <BiZoomIn
+            style={{ margin: "2px", cursor: "pointer" }}
+            color="black"
+            size="1.2rem"
+            onClick={zoomin}
+          />
+          <MdDelete
+            style={{ margin: "2px", cursor: "pointer" }}
+            size="1.2rem"
+            color="#bf1e1c"
+            onClick={deleteComment}
+          />
+        </div>
       </form>
     </div>
   );
