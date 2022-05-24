@@ -9,8 +9,10 @@ import { PDFExport, savePDF } from "@progress/kendo-react-pdf";
 // import Sketch from "@arcgis/core/widgets/Sketch";
 import GraphicsLayer from "@arcgis/core/layers/GraphicsLayer";
 import axios from "axios";
-import { exportPDF } from "@progress/kendo-drawing";
 import ihamzaCV from "./cvPhoto.png";
+import * as htmlToImage from "html-to-image";
+import PDFComponent from "../pdf/PDFComponent";
+// import testExportpdf from "../pdf/Testtest";
 import logo from "./logo.png";
 
 export default function CarteConsolidee() {
@@ -25,6 +27,7 @@ export default function CarteConsolidee() {
   const [url, seturl] = useState("http://127.0.0.1:8000/api/situations");
   const graphicsLayer = new GraphicsLayer();
   const pdfExportComponent = React.useRef(null);
+  const [exportpdfData, setexportpdfData] = useState([]);
   const [MapLayers, setMapLayers] = useState(
     new Map({
       basemap: "satellite",
@@ -98,7 +101,8 @@ export default function CarteConsolidee() {
     axios.get(urldata).then((res) => {
       res.data
         .filter((a) => {
-          console.log("a.nom.toLowerCase() : " + a.nom.toLowerCase() + ", ");
+          console.log("a.nom.toLowerCase() : " + JSON.stringify(a) + ", ");
+          setexportpdfData([]);
           if (TFCitoyen == "" && CommentaireCitoyen == "" && NomCitoyen == "") {
             return a;
           } else if (
@@ -114,6 +118,17 @@ export default function CarteConsolidee() {
         })
         .map((a) =>
           createGraphic(a["situation"], getRandomColor()) ||
+          console.log("aaaaa : " + JSON.stringify(a)) ||
+          setexportpdfData((last) => [
+            ...last,
+            {
+              nom: a.nom,
+              tf: a.tf,
+              page: a.page,
+              commentaire: a.commentaire,
+              image: a.image,
+            },
+          ]) ||
           JSON.parse(a["situation"]).features.map((graphic) => {
             graphic.geometry.coordinates[0].map(
               (coordonne) =>
@@ -135,7 +150,7 @@ export default function CarteConsolidee() {
         );
       setexportData((oldArray) => oldArray + "]}");
       //   console.log("res.data : " + JSON.stringify(res.data));
-      console.log("tab : " + tab);
+      //   console.log("tab : " + tab);
       viewGlob.goTo({
         center: [tab],
         // zoom: 13,
@@ -158,16 +173,28 @@ export default function CarteConsolidee() {
       setetudes(res.data);
     });
     // etudes ? console.log("etude : " + etudes) : console.log("");
-
+    // 20.866019, -17.02941;
+    // 32.522435, -1.028146;
+    // 35.916308, -5.485227;
     const view = new MapView({
       container: mapRef.current,
       map: MapLayers,
-      center: [-7.614392, 33.582764],
-      zoom: 11,
+      center: [-8.247694, 29.446916],
+      zoom: 5.4,
+    });
+    const tableau = [];
+    tableau.push(20.866019);
+    tableau.push(-17.02941);
+    tableau.push(32.522435);
+    tableau.push(-1.028146);
+    tableau.push(35.916308);
+    tableau.push(-5.485227);
+    view.goTo({
+      center: [tableau],
     });
     setviewGlob(view);
   }, [url]);
-  console.log("salam bro cv : " + exportData);
+  // console.log("salam bro cv : " + JSON.stringify(exportpdfData[0]));
   //   etudes ? console.log("etude : " + etudes) : console.log("");
   //   tab ? console.log("etude : " + tab) : console.log("");
   const exportFile = () => {
@@ -185,12 +212,24 @@ export default function CarteConsolidee() {
     let element = document.querySelector(".k-grid") || document.body;
     savePDF(element, {
       paperSize: "A4",
+      forcePageBreak: ".page-break",
     });
   };
   const exportPDFWithComponent = () => {
     if (pdfExportComponent.current) {
       pdfExportComponent.current.save();
     }
+  };
+  const domEl = useRef(null);
+
+  const downloadImage = async () => {
+    const dataUrl = await htmlToImage.toPng(domEl.current);
+
+    // download image
+    const link = document.createElement("a");
+    link.download = "html-to-img.png";
+    link.href = dataUrl;
+    link.click();
   };
 
   return (
@@ -205,7 +244,7 @@ export default function CarteConsolidee() {
             margin: "25px 25px 5px 25px",
           }}
         >
-          <div style={{ width: "500px", display: "flex" }}>
+          <div style={{ width: "800px", display: "flex" }}>
             <select
               value={selectedLayer}
               onChange={(e) =>
@@ -234,6 +273,29 @@ export default function CarteConsolidee() {
             <button className="iconButton" onClick={exportFile}>
               <FaFileExport color="dark" size="1.2rem" />
             </button>
+            {/* <div class="text-center" style={{ margin: "20px" }}> */}
+            {/* <button
+              type="button"
+              style={{ margin: "0px 20px" }}
+              class="btn btn-primary"
+              onClick={downloadImage}
+            >
+              Download Image
+            </button> */}
+            <button
+              type="button"
+              class="btn btn-primary"
+              onClick={exportPDFWithComponent}
+              style={{
+                margin: "0px 20px",
+                color: "#fff",
+                backgroundColor: "#97afd2",
+                borderColor: "#97afd2",
+              }}
+            >
+              Export pdf
+            </button>
+            {/* </div> */}
             {/* <AiFillFilter></AiFillFilter> */}
           </div>
           {showFilter ? (
@@ -295,62 +357,48 @@ export default function CarteConsolidee() {
         </div>
       </div>
 
-      <PDFExport ref={pdfExportComponent} paperSize="A4">
-        <div
-          style={{
-            margin: "5px 100px",
-          }}
+      <div className="divBox" style={{ marginTop: "100px" }}>
+        <PDFExport
+          ref={pdfExportComponent}
+          forcePageBreak=".page-break"
+          paperSize="A4"
         >
-          <img src={logo} />
-        </div>
-        <div
-          style={{
-            margin: "5px 100px",
-            fontSize: "8px",
-          }}
-        >
-          <div>
+          {/* <div
+            style={{
+              margin: "5px 50px",
+              display: "none",
+            }}
+          >
+            <img className="imglogo" src={logo} />
+          </div> */}
+          <div
+            style={{
+              margin: "5px 50px",
+              fontSize: "8px",
+            }}
+          >
             <div>
-              <table
-                style={{
-                  tableLayout: "fixed",
-                  width: "100%",
-                  textAlign: "center",
-                }}
-              >
-                <tr style={{ backgroundColor: "#d9d9d9", color: "white" }}>
-                  <th colspan="4">Requete N°</th>
-
-                  <th colspan="8">Situation</th>
-                </tr>
-                <tr>
-                  <td colspan="2">Page 3 & 3</td>
-                  <td colspan="2">MR. A. BOUCHOUIREB</td>
-                  <td rowspan="7">
-                    P A - E DI TI O N E N Q U E T E P U B LI Q U E-
-                  </td>
-                  <td rowspan="7" colspan="7">
-                    <img src={ihamzaCV} />
-                  </td>
-                </tr>
-                <tr>
-                  <td colspan="4">T.F. 187100/12</td>
-                </tr>
-                <tr>
-                  <td colspan="4">
-                    •S’oppose à la voie d’aménagement «LA09». •S’oppose au tracé
-                    du TGV.
-                  </td>
-                </tr>
-                <tr>
-                  <td colspan="4" rowspan="4"></td>
-                </tr>
-              </table>
+              <div>
+                {exportpdfData
+                  ? exportpdfData.map(
+                      (a) =>
+                        console.log("error :" + JSON.stringify(a)) || (
+                          <PDFComponent data={a} />
+                        )
+                    )
+                  : console.log("error :" + exportpdfData)}
+                {/* {exportpdfData ? <pdf /> : null} */}
+                {/* {exportpdfData.map((a) => {
+                <pdf />;
+                
+              })} */}
+              </div>
             </div>
           </div>
-        </div>
-      </PDFExport>
-      <button onClick={exportPDFWithComponent}>Export pdf </button>
+        </PDFExport>
+      </div>
+
+      {/* <testExportpdf /> */}
     </>
   );
 }

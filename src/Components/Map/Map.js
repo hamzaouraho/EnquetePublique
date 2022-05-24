@@ -33,32 +33,42 @@ const MyMap = (props) => {
       center: [-7.614392, 33.582764],
       zoom: 11,
     });
-    const blob = new Blob([JSON.stringify(said)], {
-      type: "application/json",
+    // const blob = new Blob([JSON.stringify(said)], {
+    //   type: "application/json",
+    // });
+    const tab = [];
+    JSON.parse(props.perimetre[0].perimetre).features.map((graphic) => {
+      graphic.geometry.coordinates[0].map((coordonne) => tab.push(coordonne));
     });
+    tab ? console.log("tab ::" + tab) : console.log();
     const blob2 = new Blob([props.perimetre[0].perimetre], {
       type: "application/json",
     });
+    Promise.all(tab).then(() => {
+      view.goTo({
+        center: [tab],
+      });
+    });
 
     // URL reference to the blob
-    const url = URL.createObjectURL(blob);
+    // const url = URL.createObjectURL(blob);
     const url2 = URL.createObjectURL(blob2);
-    const geojsonlayer = new GeoJSONLayer({
-      url: url,
-      renderer: {
-        type: "simple",
-        symbol: {
-          type: "simple-fill", // autocasts as new SimpleFillSymbol()
-          color: [255, 255, 255, 0.2],
-          outline: {
-            width: 1.5,
-            color: [255, 255, 255],
-          },
-          style: "solid",
-          // opacity: 0.33,
-        },
-      },
-    });
+    // const geojsonlayer = new GeoJSONLayer({
+    //   url: url,
+    //   renderer: {
+    //     type: "simple",
+    //     symbol: {
+    //       type: "simple-fill", // autocasts as new SimpleFillSymbol()
+    //       color: [255, 255, 255, 0.2],
+    //       outline: {
+    //         width: 1.5,
+    //         color: [255, 255, 255],
+    //       },
+    //       style: "solid",
+    //       // opacity: 0.33,
+    //     },
+    //   },
+    // });
     const geojsonlayer2 = new GeoJSONLayer({
       url: url2,
       renderer: {
@@ -80,7 +90,7 @@ const MyMap = (props) => {
           "<h4> Type : {titre}</h4>  <h4> Commentaire : {commentaire} </h4>  ",
       },
     });
-    mapLayer.add(geojsonlayer);
+    // mapLayer.add(geojsonlayer);
     // mapLayer.add(geojsonlayer2);
     if (props.perimetre) {
       mapLayer.add(geojsonlayer2);

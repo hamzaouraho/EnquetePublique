@@ -4,18 +4,18 @@ import GeoJSONLayer from "@arcgis/core/layers/GeoJSONLayer";
 import Sketch from "@arcgis/core/widgets/Sketch";
 import GraphicsLayer from "@arcgis/core/layers/GraphicsLayer";
 import * as webMercatorUtils from "@arcgis/core/geometry/support/webMercatorUtils";
+import * as geometryEngine from "@arcgis/core/geometry/geometryEngine";
 import Graphic from "@arcgis/core/Graphic";
 import "./Map.css";
 import React, { useEffect, useRef, useState } from "react";
 import "./Map.css";
-import said from "../Shapefiles/shapefile";
 import { styled } from "@mui/material/styles";
 import Commentaire from "../Commenter/Commentaire";
 import NavbarMenu from "./../NavBarMenu/NavbarMenu";
 import CommentaireTest from "./../Commenter/CommentaireTest";
 import { usePreviousProps } from "@mui/utils";
 import SaveCommentaire from "../Commenter/SaveCommentaire";
-
+import axios from "axios";
 const MyMap = (props) => {
   const mapRef = useRef(null);
   const [showResults, setShowResults] = useState(false);
@@ -32,10 +32,12 @@ const MyMap = (props) => {
   const [DataGeojson, setDataGeojson] = useState("");
   const [toreloadJSX, settoreloadJSX] = useState("");
   const [probcreatGraphZoomIn, setprobcreatGraphZoomIn] = useState("");
-  console.log(showResults);
+  const [imageURLData, setImageURLData] = useState("");
+  console.log("props : " + JSON.stringify(props));
 
   useEffect(() => {
-    console.log("inside");
+    const urlAPI = "http://127.0.0.1:8000/api/etudes/" + props.id;
+    console.log("url : " + urlAPI);
     const graphicsLayer = new GraphicsLayer();
 
     const mapLayer = new Map({
@@ -52,29 +54,46 @@ const MyMap = (props) => {
     });
     setviewGlob(view);
     // console.log(JSON.stringify(said, null, 4));
-    const blob = new Blob([JSON.stringify(said)], {
-      type: "application/json",
+
+    axios.get(urlAPI).then((res) => {
+      // console.log("res.data : " + JSON.stringify(res.data[0].perimetre));
+      const tab = [];
+      JSON.parse(res.data[0].perimetre).features.map((graphic) => {
+        graphic.geometry.coordinates[0].map((coordonne) => tab.push(coordonne));
+      });
+      // tab ? console.log("tab ::" + tab) : console.log();
+      Promise.all(tab).then(() => {
+        view.goTo({
+          center: [tab],
+        });
+      });
+      // console.log("said : " + said);
+      // console.log("res.data[0].perimetre : " + res.data[0].perimetre);
+      const blob = new Blob([res.data[0].perimetre], {
+        type: "application/json",
+      });
+      const url = URL.createObjectURL(blob);
+      const geojsonlayer = new GeoJSONLayer({
+        url: url,
+        renderer: {
+          type: "simple",
+          symbol: {
+            type: "simple-fill", // autocasts as new SimpleFillSymbol()
+            color: [255, 255, 255, 0.2],
+            outline: {
+              width: 1.5,
+              color: [255, 255, 255],
+            },
+            style: "solid",
+            // opacity: 0.33,
+          },
+        },
+      });
+      mapLayer.add(geojsonlayer);
     });
 
     // URL reference to the blob
-    const url = URL.createObjectURL(blob);
-    const geojsonlayer = new GeoJSONLayer({
-      url: url,
-      renderer: {
-        type: "simple",
-        symbol: {
-          type: "simple-fill", // autocasts as new SimpleFillSymbol()
-          color: [255, 255, 255, 0.2],
-          outline: {
-            width: 1.5,
-            color: [255, 255, 255],
-          },
-          style: "solid",
-          // opacity: 0.33,
-        },
-      },
-    });
-    mapLayer.add(geojsonlayer);
+
     view.when(() => {
       const sketch = new Sketch({
         layer: graphicsLayer,
@@ -216,6 +235,7 @@ const MyMap = (props) => {
       console.log(
         "[...FinalEntities, data] : " + JSON.stringify([...FinalEntities, data])
       );
+      zoomToPolygons([...FinalEntities, data]);
       showCommentInMaps([...FinalEntities, data]);
 
       // console.log("FinalEntities before add : " + JSON.parse(FinalEntities));
@@ -313,24 +333,53 @@ const MyMap = (props) => {
           (geojsonFile = geojsonFile.slice(0, -1) + "]]}},")
       ),
       (geojsonFile = geojsonFile.slice(0, -1) + "]}")
-    ).then(() => setDataGeojson(geojsonFile));
-    // const entityBlob = new Blob(
-    //   [
-    //     // FinalEntities
-    //     //   ? FinalEntities.map(
-    //     //       (a) => '{"type": "Feature","properties": {"commentaire": ',
-    //     //       FinalEntities ? a["comment"] : null,
-    //     //       " ",
-    //     //       '},"geometry": {"type": "Polygon","coordinates": [[',
-    //     //       a["data"].map((aa) => ("[", aa["lat"], "],[", aa["long"], "],")),
-    //     //       "]]}}"
-    //     //     )
-    //     //   : null,
-    //     "",
-    //   ],
-    //   { type: "text/plain" }
-    // );
-    // const endBlob = new Blob(["]}"], { type: "text/plain" });
+    ).then(() => setDataGeojson(geojsonFile) || zoomToLayer(geojsonFile));
+  };
+  const takeScreenShot = () => {
+    viewGlob
+      .takeScreenshot({
+        area: {
+          x: 0,
+          y: 0,
+          width: 900,
+          height: 700,
+        },
+      })
+      .then(function (screenshot) {
+        // console.log("screenshot : " + JSON.stringify(screenshot.data));
+        createImage(screenshot);
+      });
+  };
+  const zoomToLayer = (perimetre) => {
+    const tab = [];
+    JSON.parse(perimetre).features.map((graphic) => {
+      graphic.geometry.coordinates[0].map((coordonne) => tab.push(coordonne));
+    });
+    // tab ? console.log("tab ::" + tab) : console.log();
+    Promise.all(tab).then(() => {
+      viewGlob.goTo({
+        center: [tab],
+      });
+    });
+  };
+  const createImage = (screenshot) => {
+    const imageData = screenshot.data;
+
+    // create canvas
+    const canvas = document.createElement("canvas");
+    const context = canvas.getContext("2d");
+    canvas.height = imageData.height;
+    canvas.width = imageData.width;
+
+    // add the image to the canvas
+    context.putImageData(imageData, 0, 0);
+
+    // add the text from the titleInput element
+    context.font = "20px Arial";
+    context.fillStyle = "white";
+    context.fillText("", 20, 50);
+    setImageURLData(canvas.toDataURL());
+    // console.log(canvas.toDataURL());
   };
 
   const showCommentsInMap = () => {
@@ -395,9 +444,28 @@ const MyMap = (props) => {
 
     // URL reference to the blob
   };
+  const zoomToPolygons = (dataaa) => {
+    const tab = [];
+    dataaa
+      ? dataaa.map((a) => {
+          a.data.map((e) => {
+            // console.log("Show in map dataa: " + JSON.stringify(e.lat));
+            tab.push(webMercatorUtils.xyToLngLat(e.lat, e.long));
+
+            // tab.push();
+          });
+        })
+      : console.log();
+    tab ? console.log("tab ::" + tab) : console.log();
+    Promise.all(tab).then(() => {
+      viewGlob.goTo({
+        center: [tab],
+      });
+    });
+  };
+
   const showCommentInMaps = (dataaa) => {
-    // console.log("Show in map dataa: " + JSON.stringify(dataaa));
-    dataaa?.map((entities) => {
+    dataaa.map((entities) => {
       const hamza = new Graphic({
         geometry: {
           type: "polygon", // autocasts as new Polygon()
@@ -624,6 +692,7 @@ const MyMap = (props) => {
       settoreloadJSX("" + Math.random());
       console.log("delete button");
     }
+    // console.log("test FinalEntities : " + FinalEntities);
     showCommentInMaps(FinalEntities);
 
     // settoreloadJSX("" + Math.random());
@@ -802,7 +871,7 @@ const MyMap = (props) => {
               <button
                 class="button-28 buttonStyle"
                 type="submit"
-                onClick={showCommentInMaps}
+                onClick={showCommentInMaps(FinalEntities)}
               >
                 Show In Map
               </button>
@@ -817,9 +886,11 @@ const MyMap = (props) => {
                 class="button-28 buttonStyle"
                 href="#"
                 type="submit"
-                onClick={() => (
-                  getGeojson(), setsaveRequeteButton(!saveRequeteButton)
-                )}
+                onClick={() =>
+                  getGeojson() ||
+                  setsaveRequeteButton(!saveRequeteButton) ||
+                  takeScreenShot()
+                }
               >
                 Save
               </button>
@@ -829,6 +900,7 @@ const MyMap = (props) => {
                 <SaveCommentaire
                   saveButtonV={(value) => setsaveRequeteButton(value)}
                   data={DataGeojson}
+                  dataImage={imageURLData}
                   id={props.id}
                 />
               ) : null}

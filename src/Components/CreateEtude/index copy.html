@@ -1,0 +1,221 @@
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta
+      name="viewport"
+      content="initial-scale=1,maximum-scale=1,user-scalable=no"
+    />
+    <title>Get length and area</title>
+    <style>
+      html,
+      body,
+      #viewDiv {
+        padding: 0;
+        margin: 0;
+        height: 100%;
+        width: 100%;
+      }
+
+      #measurements {
+        padding: 4px 8px;
+        font-size: 16px;
+        bottom: 15px;
+        left: 50%;
+        margin-right: -50%;
+        transform: translate(-50%, -50%);
+      }
+    </style>
+
+    <link
+      rel="stylesheet"
+      href="https://js.arcgis.com/4.23/esri/themes/light/main.css"
+    />
+    <script src="https://js.arcgis.com/4.23/"></script>
+    <script>
+      require([
+        "esri/config",
+        "esri/Map",
+        "esri/views/MapView",
+
+        "esri/widgets/ScaleBar",
+        "esri/widgets/Sketch",
+        "esri/Graphic",
+        "esri/layers/GraphicsLayer",
+        "esri/geometry/geometryEngine",
+        "esri/geometry/support/webMercatorUtils",
+      ], (
+        esriConfig,
+        Map,
+        MapView,
+
+        ScaleBar,
+        Sketch,
+        Graphic,
+        GraphicsLayer,
+        geometryEngine,
+        webMercatorUtils
+      ) => {
+        esriConfig.apiKey = "YOUR_API_KEY";
+
+        const map = new Map({
+          basemap: "satellite", // Basemap layer service
+        });
+
+        const view = new MapView({
+          container: "viewDiv",
+          map: map,
+
+          center: [-10, 30],
+          zoom: 3,
+        });
+
+        const scalebar = new ScaleBar({
+          view: view,
+          unit: "metric",
+        });
+
+        view.ui.add(scalebar, "bottom-right");
+
+        const graphicsLayer = new GraphicsLayer();
+        map.add(graphicsLayer);
+
+        const sketch = new Sketch({
+          layer: graphicsLayer,
+          view: view,
+          availableCreateTools: ["polyline", "polygon", "rectangle"],
+          creationMode: "update",
+          updateOnGraphicClick: true,
+          visibleElements: {
+            createTools: {
+              point: false,
+              circle: false,
+            },
+            selectionTools: {
+              "lasso-selection": false,
+              "rectangle-selection": false,
+            },
+            settingsMenu: false,
+            undoRedoMenu: false,
+          },
+        });
+        const measurements = document.getElementById("measurements");
+        view.ui.add(measurements, "manual");
+        const polygon = {
+          type: "polygon",
+          spatialReference: {
+            wkid: 4326,
+          },
+          rings: [
+            [
+              [34.065077, -6.799591],
+              [34.064439, -6.79854],
+              [34.063844, -6.799122],
+              [34.064555, -6.800125],
+              // [-2629552.6750536393, 3599936.936171892],
+              // [-4508069.082189632, 3599936.936171892],
+            ],
+          ],
+        };
+        const polygon2 = {
+          type: "polygon",
+          spatialReference: {
+            wkid: 3857,
+          },
+          rings: [
+            [
+              webMercatorUtils.lngLatToXY(34.065077, -6.799591),
+              webMercatorUtils.lngLatToXY(34.064439, -6.79854),
+              webMercatorUtils.lngLatToXY(34.063844, -6.799122),
+              webMercatorUtils.lngLatToXY(34.064555, -6.800125),
+            ],
+          ],
+        };
+        const simplePolygonSymbol = {
+          type: "simple-fill",
+          outline: {
+            color: [200, 0, 0],
+            width: 2,
+          },
+        };
+        function getArea(polygon) {
+          // console.log("polygon : " + JSON.stringify(polygon.rings[0]));
+
+          // console.log(
+          //   "polygon : " +
+          //     webMercatorUtils.xyToLngLat(-4508069.082189632, 3599936.936)
+          // );
+          const geodesicArea = geometryEngine.geodesicArea(
+            polygon,
+            "square-kilometers"
+          );
+          const planarArea = geometryEngine.planarArea(
+            polygon,
+            "square-kilometers"
+          );
+          console.log(
+            "Geodesic area : " +
+              geodesicArea +
+              " Planar area : " +
+              planarArea.toFixed(2)
+          );
+          measurements.innerHTML =
+            "<b>Geodesic area</b>:  " +
+            geodesicArea +
+            " km\xB2" +
+            " |   <b>Planar area</b>: " +
+            planarArea.toFixed(2) +
+            "  km\xB2";
+        }
+        function switchType(geom) {
+          switch (geom.type) {
+            case "polygon":
+              getArea(geom);
+              break;
+            case "polyline":
+              getLength(geom);
+              break;
+            default:
+              console.log("No value found");
+          }
+        }
+        const polygonGraphic = new Graphic({
+          geometry: polygon,
+          symbol: simplePolygonSymbol,
+        });
+
+        graphicsLayer.add(polygonGraphic);
+        view.when(() => {
+          sketch.update(polygonGraphic);
+          getArea(polygonGraphic.geometry);
+        });
+        sketch.on("update", (e) => {
+          const geometry = e.graphics[0].geometry;
+
+          if (e.state === "start") {
+            switchType(geometry);
+          }
+
+          if (e.state === "complete") {
+            graphicsLayer.remove(graphicsLayer.graphics.getItemAt(0));
+            measurements.innerHTML = null;
+          }
+
+          if (
+            e.toolEventInfo &&
+            (e.toolEventInfo.type === "scale-stop" ||
+              e.toolEventInfo.type === "reshape-stop" ||
+              e.toolEventInfo.type === "move-stop")
+          ) {
+            switchType(geometry);
+          }
+        });
+        getArea(polygon2);
+      });
+    </script>
+  </head>
+  <body>
+    <div id="viewDiv">
+      <div id="measurements" class="esri-widget"></div>
+    </div>
+  </body>
+</html>

@@ -11,10 +11,11 @@ export default function SaveCommentaire(props, saveButtonV) {
   const [saveButtonValue, setsaveButtonValue] = useState(true);
   const url = "http://127.0.0.1:8000/api/etudes";
   const stock = "aa";
+
   props.data
     ? console.log("yzyz " + JSON.stringify(props.data))
     : console.log("");
-  console.log("commentaire avant : " + commentaire);
+  // console.log("commentaire avant : " + commentaire);
   props.data
     ? JSON.parse(props.data).features.map((a, i) => {
         console.log(i);
@@ -57,7 +58,9 @@ export default function SaveCommentaire(props, saveButtonV) {
         ", " +
         commentaire +
         ", " +
-        props.data
+        props.data +
+        ", " +
+        props.dataImage
     );
     axios
       .post("http://127.0.0.1:8000/api/createRequete", {
@@ -66,6 +69,7 @@ export default function SaveCommentaire(props, saveButtonV) {
         page: Page,
         commentaire: commentaire,
         situation: props.data,
+        image: props.dataImage,
         etudeId: props.id,
       })
       .then((res) =>

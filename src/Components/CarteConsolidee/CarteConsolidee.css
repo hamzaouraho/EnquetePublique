@@ -16,11 +16,21 @@
 .iconButton:hover {
   background-color: white;
 }
-img {
+.imglogo {
   border: 1px solid #ddd;
   border-radius: 4px;
   padding: 5px;
   width: 150px;
+}
+.imglogo2 {
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  padding: 5px;
+  width: 250px;
+}
+.imglogoo {
+  border-radius: 4px;
+  width: 120px;
 }
 th,
 td {
