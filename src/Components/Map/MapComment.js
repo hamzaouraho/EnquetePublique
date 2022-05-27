@@ -9,6 +9,7 @@ import Graphic from "@arcgis/core/Graphic";
 import "./Map.css";
 import React, { useEffect, useRef, useState } from "react";
 import "./Map.css";
+import said from "../Shapefiles/shapefile";
 import { styled } from "@mui/material/styles";
 import Commentaire from "../Commenter/Commentaire";
 import NavbarMenu from "./../NavBarMenu/NavbarMenu";
@@ -33,11 +34,13 @@ const MyMap = (props) => {
   const [toreloadJSX, settoreloadJSX] = useState("");
   const [probcreatGraphZoomIn, setprobcreatGraphZoomIn] = useState("");
   const [imageURLData, setImageURLData] = useState("");
-  console.log("props : " + JSON.stringify(props));
+  const [imageComment, setImageComment] = useState("");
+  const [CmommentaireTestData, setCmommentaireTestData] = useState([]);
+  // console.log("props : " + JSON.stringify(props));
 
   useEffect(() => {
     const urlAPI = "http://127.0.0.1:8000/api/etudes/" + props.id;
-    console.log("url : " + urlAPI);
+    // console.log("url : " + urlAPI);
     const graphicsLayer = new GraphicsLayer();
 
     const mapLayer = new Map({
@@ -232,14 +235,35 @@ const MyMap = (props) => {
       setShowAddComment(false);
       deleteAllGraphics();
       viewGlob.graphics.removeAll();
+      // console.log(
+      //   "[...FinalEntities, data] : " + JSON.stringify([...FinalEntities, data])
+      // );
+      // [...FinalEntities, data].map((a) => {
+      //   // console.log("Inside FinalEntities  : " + JSON.stringify(a));
+      // });
+      zoomToPolygons(data);
       console.log(
-        "[...FinalEntities, data] : " + JSON.stringify([...FinalEntities, data])
+        "data : " +
+          JSON.stringify(data) +
+          ", FinalEntities : " +
+          JSON.stringify(FinalEntities)
       );
-      zoomToPolygons([...FinalEntities, data]);
       showCommentInMaps([...FinalEntities, data]);
-
+      setFinalEntities((oldArray) => [...oldArray]);
+      // data.image = imageComment;
+      // imageComment != ""
+      //   ? console.log("imageComment : " + imageComment)
+      //   : console.log();
       // console.log("FinalEntities before add : " + JSON.parse(FinalEntities));
-      setFinalEntities((oldArray) => [...oldArray, data]);
+      // setFinalEntities((oldArray) => [...oldArray, data]);
+      // [...FinalEntities, data].map(
+      //   (a, i) => (
+      //     FinalEntities[i + 1]
+      //       ? (a.image = FinalEntities[i + 1].image)
+      //       : console.log(),
+      //     setCmommentaireTestData((oldArray) => [...oldArray, a])
+      //   )
+      // );
 
       // console.log("FinalEntities after add : " + JSON.parse(FinalEntities));
     }
@@ -335,7 +359,7 @@ const MyMap = (props) => {
       (geojsonFile = geojsonFile.slice(0, -1) + "]}")
     ).then(() => setDataGeojson(geojsonFile) || zoomToLayer(geojsonFile));
   };
-  const takeScreenShot = () => {
+  const takeScreenShot = (imagedata) => {
     viewGlob
       .takeScreenshot({
         area: {
@@ -347,8 +371,36 @@ const MyMap = (props) => {
       })
       .then(function (screenshot) {
         // console.log("screenshot : " + JSON.stringify(screenshot.data));
-        createImage(screenshot);
+        createImage(screenshot, imagedata);
       });
+  };
+  const takeScreenShotForFinale = () => {
+    viewGlob
+      .takeScreenshot({
+        area: {
+          x: 0,
+          y: 0,
+          width: 900,
+          height: 700,
+        },
+      })
+      .then(function (screenshot) {
+        // console.log("screenshot : " + JSON.stringify(screenshot.data));
+        createImageForFinal(screenshot);
+      });
+  };
+  const createImageForFinal = (screenshot) => {
+    const imageData = screenshot.data;
+    const canvas = document.createElement("canvas");
+    const context = canvas.getContext("2d");
+    canvas.height = imageData.height;
+    canvas.width = imageData.width;
+    context.putImageData(imageData, 0, 0);
+    context.font = "20px Arial";
+    context.fillStyle = "white";
+    context.fillText("", 20, 50);
+    setImageURLData(canvas.toDataURL());
+    setsaveRequeteButton(!saveRequeteButton);
   };
   const zoomToLayer = (perimetre) => {
     const tab = [];
@@ -362,7 +414,7 @@ const MyMap = (props) => {
       });
     });
   };
-  const createImage = (screenshot) => {
+  const createImage = (screenshot, imagedata) => {
     const imageData = screenshot.data;
 
     // create canvas
@@ -378,8 +430,13 @@ const MyMap = (props) => {
     context.font = "20px Arial";
     context.fillStyle = "white";
     context.fillText("", 20, 50);
+    // setImageURLData(canvas.toDataURL());
     setImageURLData(canvas.toDataURL());
+    setImageComment(canvas.toDataURL());
+    imagedata.image = canvas.toDataURL();
+    setFinalEntities((oldArray) => [...oldArray, imagedata]);
     // console.log(canvas.toDataURL());
+    // console.log("ImageURLData : :  : : : :" + imageURLData);
   };
 
   const showCommentsInMap = () => {
@@ -444,7 +501,94 @@ const MyMap = (props) => {
 
     // URL reference to the blob
   };
+  function getArea(polygon) {
+    const geodesicArea = geometryEngine.geodesicArea(polygon, "square-meters");
+    return geodesicArea;
+  }
   const zoomToPolygons = (dataaa) => {
+    let area = 0;
+
+    let polygon = {
+      type: "polygon",
+      spatialReference: {
+        wkid: 4326,
+      },
+      rings: [
+        dataaa["data"].map((entity) => {
+          return [
+            webMercatorUtils.xyToLngLat(entity["lat"], entity["long"])[0],
+            webMercatorUtils.xyToLngLat(entity["lat"], entity["long"])[1],
+          ];
+        }),
+      ],
+    };
+    area = area + getArea(polygon);
+
+    console.log("area : " + area);
+    console.log(
+      "data : " +
+        JSON.stringify(dataaa) +
+        ", FinalEntities : " +
+        JSON.stringify(FinalEntities)
+    );
+    const tab = [];
+    dataaa
+      ? // dataaa.map((a) => {
+        dataaa.data.map((e) => {
+          // console.log("Show in map dataa: " + JSON.stringify(e.lat));
+          tab.push(webMercatorUtils.xyToLngLat(e.lat, e.long));
+
+          // tab.push();
+        })
+      : // })
+        console.log();
+    tab ? console.log("tab ::" + tab) : console.log();
+
+    if (area > 3700) {
+      Promise.all(tab).then(() => {
+        viewGlob.goTo({
+          center: [tab],
+        });
+        // setTimeout(takeScreenShot(dataaa), 12000);
+        setTimeout(() => {
+          takeScreenShot(dataaa);
+        }, 800);
+      });
+    } else {
+      Promise.all(tab).then(() => {
+        viewGlob.goTo({
+          center: [tab],
+          zoom: 18,
+        });
+        // setTimeout(takeScreenShot(dataaa), 12000);
+        setTimeout(() => {
+          takeScreenShot(dataaa);
+        }, 800);
+      });
+    }
+  };
+  const zoomToPolygonsForFinale = (dataaa) => {
+    let area = 0;
+    dataaa
+      ? dataaa.map((entities) => {
+          let polygon = {
+            type: "polygon",
+            spatialReference: {
+              wkid: 4326,
+            },
+            rings: [
+              entities["data"].map((entity) => {
+                return [
+                  webMercatorUtils.xyToLngLat(entity["lat"], entity["long"])[0],
+                  webMercatorUtils.xyToLngLat(entity["lat"], entity["long"])[1],
+                ];
+              }),
+            ],
+          };
+          area = area + getArea(polygon);
+        })
+      : console.log();
+    console.log("area : " + area);
     const tab = [];
     dataaa
       ? dataaa.map((a) => {
@@ -455,79 +599,106 @@ const MyMap = (props) => {
             // tab.push();
           });
         })
-      : console.log();
+      : // })
+        console.log();
     tab ? console.log("tab ::" + tab) : console.log();
-    Promise.all(tab).then(() => {
-      viewGlob.goTo({
-        center: [tab],
+    if (area > 1700) {
+      Promise.all(tab).then(() => {
+        viewGlob.goTo({
+          center: [tab],
+        });
+        // setTimeout(takeScreenShot(dataaa), 12000);
+        setTimeout(() => {
+          takeScreenShotForFinale();
+        }, 800);
       });
-    });
+    } else {
+      Promise.all(tab).then(() => {
+        viewGlob.goTo({
+          center: [tab],
+          zoom: 18,
+        });
+        // setTimeout(takeScreenShot(dataaa), 12000);
+        setTimeout(() => {
+          takeScreenShotForFinale();
+        }, 800);
+      });
+    }
   };
 
   const showCommentInMaps = (dataaa) => {
-    dataaa.map((entities) => {
-      const hamza = new Graphic({
-        geometry: {
-          type: "polygon", // autocasts as new Polygon()
-          rings: [
-            entities["data"].map((entity) => {
-              return [
-                webMercatorUtils.xyToLngLat(entity["lat"], entity["long"])[0],
-                webMercatorUtils.xyToLngLat(entity["lat"], entity["long"])[1],
-              ];
-            }),
+    // console.log("dataaa : " + JSON.stringify(dataaa));
+    dataaa
+      ? dataaa.map((entities) => {
+          const hamza = new Graphic({
+            geometry: {
+              type: "polygon", // autocasts as new Polygon()
+              rings: [
+                entities["data"].map((entity) => {
+                  return [
+                    webMercatorUtils.xyToLngLat(
+                      entity["lat"],
+                      entity["long"]
+                    )[0],
+                    webMercatorUtils.xyToLngLat(
+                      entity["lat"],
+                      entity["long"]
+                    )[1],
+                  ];
+                }),
 
-            // [
-            //   entities["data"].map((entity) => [
-            //     webMercatorUtils.xyToLngLat(entity["lat"], entity["long"])[1] ||
-            //       webMercatorUtils.xyToLngLat(entity["lat"], entity["long"])[0],
-            //     // JSON.stringify(
-            //     //   "[" +
-            //     //     webMercatorUtils.xyToLngLat(
-            //     //       entity["lat"],
-            //     //       entity["long"]
-            //     //     )[1] +
-            //     //     "," +
-            //     //     webMercatorUtils.xyToLngLat(
-            //     //       entity["lat"],
-            //     //       entity["long"]
-            //     //     )[1] +
-            //     //     "]"
-            //     // ),
-            //   ]),
-            // ],
-          ],
-        },
-        symbol: {
-          type: "simple-fill", // autocasts as new SimpleFillSymbol()
-          color: [227, 139, 79, 0.8],
-          outline: {
-            // autocasts as new SimpleLineSymbol()
-            color: [255, 255, 255],
-            width: 1,
-          },
-        },
-        popupTemplate: {
-          title: "Commentaire",
-          content:
-            "<h4> Type : " +
-            entities["titre"] +
-            "</h4>  <h4> Commentaire : " +
-            entities["comment"] +
-            "</h4>  ",
-        },
-      });
-      // console.log("rayaaah" + JSON.stringify(hamza));
+                // [
+                //   entities["data"].map((entity) => [
+                //     webMercatorUtils.xyToLngLat(entity["lat"], entity["long"])[1] ||
+                //       webMercatorUtils.xyToLngLat(entity["lat"], entity["long"])[0],
+                //     // JSON.stringify(
+                //     //   "[" +
+                //     //     webMercatorUtils.xyToLngLat(
+                //     //       entity["lat"],
+                //     //       entity["long"]
+                //     //     )[1] +
+                //     //     "," +
+                //     //     webMercatorUtils.xyToLngLat(
+                //     //       entity["lat"],
+                //     //       entity["long"]
+                //     //     )[1] +
+                //     //     "]"
+                //     // ),
+                //   ]),
+                // ],
+              ],
+            },
+            symbol: {
+              type: "simple-fill", // autocasts as new SimpleFillSymbol()
+              color: [255, 255, 255, 0],
+              outline: {
+                // autocasts as new SimpleLineSymbol()
+                color: "#eb0000",
+                width: 3,
+              },
+            },
+            popupTemplate: {
+              title: "Commentaire",
+              content:
+                "<h4> Type : " +
+                entities["titre"] +
+                "</h4>  <h4> Commentaire : " +
+                entities["comment"] +
+                "</h4>  ",
+            },
+          });
+          // console.log("rayaaah" + JSON.stringify(hamza));
 
-      viewGlob.graphics.add(hamza);
-    });
+          viewGlob.graphics.add(hamza);
+        })
+      : console.log();
 
     // viewGlob.graphics.add(polygonGraphic);
   };
   const reset = () => {
     setFinalEntities([]);
     viewGlob.graphics.removeAll();
-
+    setImageURLData([]);
     // console.log("finalentities : " + JSON.stringify(FinalEntities));
     // console.log("setChotuseEffect : " + JSON.stringify(setChotuseEffect));
     deleteLayer();
@@ -835,6 +1006,7 @@ const MyMap = (props) => {
                       data={data}
                       zoomin={datazoomin}
                       deleteComment={datadeleteComment}
+                      imageComment={imageComment}
                       CommentActionn={(v) => {
                         // if (probcreatGraphZoomIn != v.data.data) {
                         //   console.log(
@@ -886,11 +1058,7 @@ const MyMap = (props) => {
                 class="button-28 buttonStyle"
                 href="#"
                 type="submit"
-                onClick={() =>
-                  getGeojson() ||
-                  setsaveRequeteButton(!saveRequeteButton) ||
-                  takeScreenShot()
-                }
+                onClick={() => zoomToPolygonsForFinale(FinalEntities)}
               >
                 Save
               </button>
@@ -899,7 +1067,8 @@ const MyMap = (props) => {
               {saveRequeteButton ? (
                 <SaveCommentaire
                   saveButtonV={(value) => setsaveRequeteButton(value)}
-                  data={DataGeojson}
+                  // data={DataGeojson}
+                  data={FinalEntities}
                   dataImage={imageURLData}
                   id={props.id}
                 />

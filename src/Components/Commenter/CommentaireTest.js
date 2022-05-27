@@ -9,6 +9,7 @@ export default function CommentaireTest(props, CommentActionn) {
     action: "",
     data: props.data,
   });
+  // console.log("{props.image : " + props.data["image"]);
   props.CommentActionn(CommentAction);
   // console.log("salem : " + JSON.stringify(props.data));
   const zoomin = (e) => {
@@ -24,11 +25,11 @@ export default function CommentaireTest(props, CommentActionn) {
       style={{
         margin: "15px 25px",
         backgroundColor: "#45617e30",
+        padding: "13px",
         // display: "flex",
         // border: "1px solid #FFF",
         borderRadius: "6px",
         // backgroundColor:"#34346f",
-        padding: "5px",
         boxShadow:
           "0 2px 4px 0 rgba(0, 0, 0, 0.2), 0 3px 10px 0 rgba(0, 0, 0, 0.19)",
       }}
@@ -49,6 +50,7 @@ export default function CommentaireTest(props, CommentActionn) {
             <label
               style={{
                 width: "150px",
+                paddingRight: "10px",
                 display: "flex",
                 justifyContent: "center",
                 alignItems: "center",
@@ -61,9 +63,19 @@ export default function CommentaireTest(props, CommentActionn) {
               id="field5"
               readOnly
               class="field-long field-textarea"
-              style={{ height: "40px" }}
+              style={{ height: "60px" }}
               value={props.data["comment"]}
             ></textarea>
+            <img
+              src={props.data["image"]}
+              alt="Paris"
+              style={{
+                width: "60px",
+                height: "60px",
+                marginLeft: "10px",
+                // marginRight: "10px",
+              }}
+            />
           </li>
         </ul>
         <div

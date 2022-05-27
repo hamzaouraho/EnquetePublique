@@ -43,6 +43,8 @@
         "esri/layers/GraphicsLayer",
         "esri/geometry/geometryEngine",
         "esri/geometry/support/webMercatorUtils",
+        "esri/geometry/geometryEngineAsync",
+        "esri/geometry/Point",
       ], (
         esriConfig,
         Map,
@@ -53,7 +55,9 @@
         Graphic,
         GraphicsLayer,
         geometryEngine,
-        webMercatorUtils
+        webMercatorUtils,
+        geometryEngineAsync,
+        Point
       ) => {
         esriConfig.apiKey = "YOUR_API_KEY";
 
@@ -111,6 +115,25 @@
               [34.064439, -6.79854],
               [34.063844, -6.799122],
               [34.064555, -6.800125],
+              [34.063844, -6.799122],
+
+              // [-2629552.6750536393, 3599936.936171892],
+              // [-4508069.082189632, 3599936.936171892],
+            ],
+          ],
+        };
+        const polygonn = {
+          type: "polygon",
+          spatialReference: {
+            wkid: 4326,
+          },
+          rings: [
+            [
+              [34.065077, -6.799591],
+              [34.064439, -6.79854],
+              [34.063844, -6.799122],
+              [34.064555, -6.800125],
+              [34.063844, -6.799122],
               // [-2629552.6750536393, 3599936.936171892],
               // [-4508069.082189632, 3599936.936171892],
             ],
@@ -127,6 +150,7 @@
               webMercatorUtils.lngLatToXY(34.064439, -6.79854),
               webMercatorUtils.lngLatToXY(34.063844, -6.799122),
               webMercatorUtils.lngLatToXY(34.064555, -6.800125),
+              webMercatorUtils.lngLatToXY(34.063844, -6.799122),
             ],
           ],
         };
@@ -137,6 +161,41 @@
             width: 2,
           },
         };
+        const point1 = {
+          type: "point", // autocasts as new Point()
+          longitude: -49.97,
+          latitude: 41.73,
+        };
+        const point2 = {
+          type: "point", // autocasts as new Point()
+          longitude: -59.97,
+          latitude: 41.73,
+        };
+        // const totalDistance = geometryEngine.distance(point1, point2, "feet");
+        // var pointGraphic = new Graphic({
+        //   geometry: Point,
+        //   symbol: simpleMarkerSymbol,
+        //   //*** ADD ***//
+        // });
+        var simpleMarkerSymbol = {
+          type: "simple-marker",
+          color: [46, 204, 113], // Green
+          outline: {
+            color: [255, 255, 255], // white
+            width: 1,
+          },
+        };
+        const Pointtr = {
+          type: "point",
+          longitude: 48.738586,
+          latitude: 24.774265,
+        };
+        const totalDistancee = geometryEngineAsync.distance(
+          Pointtr,
+          Pointtr,
+          "feet"
+        );
+        console.log("distance : " + JSON.stringify(totalDistancee));
         function getArea(polygon) {
           // console.log("polygon : " + JSON.stringify(polygon.rings[0]));
 
@@ -146,11 +205,11 @@
           // );
           const geodesicArea = geometryEngine.geodesicArea(
             polygon,
-            "square-kilometers"
+            "square-meters"
           );
           const planarArea = geometryEngine.planarArea(
             polygon,
-            "square-kilometers"
+            "square-meters"
           );
           console.log(
             "Geodesic area : " +
