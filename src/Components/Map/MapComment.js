@@ -5,6 +5,7 @@ import Sketch from "@arcgis/core/widgets/Sketch";
 import GraphicsLayer from "@arcgis/core/layers/GraphicsLayer";
 import * as webMercatorUtils from "@arcgis/core/geometry/support/webMercatorUtils";
 import * as geometryEngine from "@arcgis/core/geometry/geometryEngine";
+import LabelClass from "@arcgis/core/layers/support/LabelClass";
 import Graphic from "@arcgis/core/Graphic";
 import "./Map.css";
 import React, { useEffect, useRef, useState } from "react";
@@ -37,12 +38,76 @@ const MyMap = (props) => {
   const [imageComment, setImageComment] = useState("");
   const [CmommentaireTestData, setCmommentaireTestData] = useState([]);
   // console.log("props : " + JSON.stringify(props));
-
+  let renderer = {
+    type: "unique-value", // autocasts as new UniqueValueRenderer()
+    field: "type",
+    defaultSymbol: { type: "simple-fill" }, // autocasts as new SimpleFillSymbol()
+    uniqueValueInfos: [
+      {
+        // All features with value of "North" will be blue
+        value: "ZV",
+        symbol: {
+          type: "simple-fill", // autocasts as new SimpleFillSymbol()
+          color: [0, 0, 255, 0.5],
+        },
+      },
+      {
+        // All features with value of "East" will be green
+        value: "EV",
+        symbol: {
+          type: "simple-fill", // autocasts as new SimpleFillSymbol()
+          color: [50, 205, 50, 0.5],
+        },
+      },
+      {
+        // All features with value of "South" will be red
+        value: "AD",
+        symbol: {
+          type: "simple-fill", // autocasts as new SimpleFillSymbol()
+          color: [255, 0, 0, 0.5],
+        },
+      },
+      {
+        // All features with value of "West" will be yellow
+        value: "SK",
+        symbol: {
+          type: "simple-fill", // autocasts as new SimpleFillSymbol()
+          color: [255, 255, 0, 0.5],
+        },
+      },
+      {
+        // All features with value of "West" will be yellow
+        value: "HC",
+        symbol: {
+          type: "simple-fill", // autocasts as new SimpleFillSymbol()
+          color: [255, 165, 0, 0.5],
+        },
+      },
+    ],
+  };
+  function hexToRgb(hex) {
+    var result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+    return result
+      ? {
+          r: parseInt(result[1], 16),
+          g: parseInt(result[2], 16),
+          b: parseInt(result[3], 16),
+          a: 0.6,
+        }
+      : null;
+  }
+  function getRandomColor() {
+    var letters = "0123456789ABCDEF";
+    var color = "#";
+    for (var i = 0; i < 6; i++) {
+      color += letters[Math.floor(Math.random() * 16)];
+    }
+    // color += "c9";
+    return color;
+  }
   useEffect(() => {
     const urlAPI = "http://127.0.0.1:8000/api/etudes/" + props.id;
-    // console.log("url : " + urlAPI);
     const graphicsLayer = new GraphicsLayer();
-
     const mapLayer = new Map({
       basemap: "satellite",
       layers: [graphicsLayer],
@@ -57,42 +122,193 @@ const MyMap = (props) => {
     });
     setviewGlob(view);
     // console.log(JSON.stringify(said, null, 4));
-
+    let statesLabelClass = new LabelClass();
+    let Layers = [];
+    const tab = [];
     axios.get(urlAPI).then((res) => {
-      // console.log("res.data : " + JSON.stringify(res.data[0].perimetre));
-      const tab = [];
-      JSON.parse(res.data[0].perimetre).features.map((graphic) => {
-        graphic.geometry.coordinates[0].map((coordonne) => tab.push(coordonne));
-      });
-      // tab ? console.log("tab ::" + tab) : console.log();
+      console.log("res.data : " + JSON.stringify(res.data[0].perimetre));
+      if (res.data[0].perimetre.includes("%pablo144%")) {
+        Layers = res.data[0].perimetre.split("%pablo144%");
+      } else {
+        Layers = res.data[0].perimetre;
+      }
+      if (Array.isArray(Layers)) {
+        Layers.map((layer) => {
+          if (JSON.parse(layer).name == "ZONAGE") {
+            statesLabelClass = new LabelClass({
+              labelExpressionInfo: { expression: "$feature.NAME" },
+              symbol: {
+                type: "text",
+                color: [255, 255, 255, 255], // white
+                font: { family: "Arial Unicode MS", size: 10, weight: "bold" },
+                haloColor: [0, 0, 0, 255], // black
+                haloSize: 1,
+              },
+            });
+          } else if (JSON.parse(layer).name == "EQUIPEMENTS") {
+            statesLabelClass = new LabelClass({
+              labelExpressionInfo: { expression: "$feature.NOM" },
+              symbol: {
+                type: "text",
+                color: [255, 255, 255, 255], // white
+                font: { family: "Arial Unicode MS", size: 10, weight: "bold" },
+                haloColor: [0, 0, 0, 255], // black
+                haloSize: 1,
+              },
+            });
+          } else {
+            statesLabelClass = new LabelClass({
+              labelExpressionInfo: { expression: "$feature.nom" },
+              symbol: {
+                type: "text",
+                color: [255, 255, 255, 255], // white
+                font: { family: "Arial Unicode MS", size: 10, weight: "bold" },
+                haloColor: [0, 0, 0, 255], // black
+                haloSize: 1,
+              },
+            });
+          }
+          JSON.parse(layer).features.map((graphic) => {
+            graphic.geometry.coordinates[0].map((coordonne) =>
+              tab.push(coordonne)
+            );
+          });
+          const blob2 = new Blob([layer], {
+            type: "application/json",
+          });
+          const url2 = URL.createObjectURL(blob2);
+          const geojsonlayer2 = new GeoJSONLayer({
+            url: url2,
+            renderer: {
+              type: "simple",
+              symbol: {
+                type: "simple-fill", // autocasts as new SimpleFillSymbol()
+                // color: `${generateColors()}`,
+                color: hexToRgb(getRandomColor()),
+                outline: {
+                  width: 1.5,
+                  color: "black",
+                },
+                style: "solid",
+                // opacity: 0.33,
+              },
+            },
+            popupTemplate: {
+              title: "Commentaire",
+              content: "Magnitude {fill},,$feature.fill  hit {nom} ",
+            },
+          });
+
+          geojsonlayer2.labelingInfo = [statesLabelClass];
+          mapLayer.add(geojsonlayer2);
+        });
+      } else {
+        if (JSON.parse(Layers).name == "ZONAGE") {
+          statesLabelClass = new LabelClass({
+            labelExpressionInfo: { expression: "$feature.NAME" },
+            symbol: {
+              type: "text",
+              color: [255, 255, 255, 255], // white
+              font: { family: "Arial Unicode MS", size: 10, weight: "bold" },
+              haloColor: [0, 0, 0, 255], // black
+              haloSize: 1,
+            },
+          });
+        } else if (JSON.parse(Layers).name == "EQUIPEMENTS") {
+          statesLabelClass = new LabelClass({
+            labelExpressionInfo: { expression: "$feature.NOM" },
+            symbol: {
+              type: "text",
+              color: [255, 255, 255, 255], // white
+              font: { family: "Arial Unicode MS", size: 10, weight: "bold" },
+              haloColor: [0, 0, 0, 255], // black
+              haloSize: 1,
+            },
+          });
+        } else {
+          statesLabelClass = new LabelClass({
+            labelExpressionInfo: { expression: "$feature.nom" },
+            symbol: {
+              type: "text",
+              color: [255, 255, 255, 255], // white
+              font: { family: "Arial Unicode MS", size: 10, weight: "bold" },
+              haloColor: [0, 0, 0, 255], // black
+              haloSize: 1,
+            },
+          });
+        }
+        JSON.parse(Layers).features.map((graphic) => {
+          graphic.geometry.coordinates[0].map((coordonne) =>
+            tab.push(coordonne)
+          );
+        });
+        const blob2 = new Blob([Layers], {
+          type: "application/json",
+        });
+        const url2 = URL.createObjectURL(blob2);
+        const geojsonlayer2 = new GeoJSONLayer({
+          url: url2,
+          renderer: {
+            type: "simple",
+            symbol: {
+              type: "simple-fill", // autocasts as new SimpleFillSymbol()
+              // color: `${generateColors()}`,
+              color: hexToRgb(getRandomColor()),
+              outline: {
+                width: 1.5,
+                color: "black",
+              },
+              style: "solid",
+              // opacity: 0.33,
+            },
+          },
+          popupTemplate: {
+            title: "Commentaire",
+            content: "Magnitude {fill},,$feature.fill  hit {nom} ",
+          },
+        });
+
+        geojsonlayer2.labelingInfo = [statesLabelClass];
+        mapLayer.add(geojsonlayer2);
+      }
       Promise.all(tab).then(() => {
         view.goTo({
           center: [tab],
         });
       });
+
+      // const tab = [];
+      // JSON.parse(res.data[0].perimetre).features.map((graphic) => {
+      //   graphic.geometry.coordinates[0].map((coordonne) => tab.push(coordonne));
+      // });
+      // tab ? console.log("tab ::" + tab) : console.log();
+      // Promise.all(tab).then(() => {
+      //   view.goTo({
+      //     center: [tab],
+      //   });
+      // });
       // console.log("said : " + said);
       // console.log("res.data[0].perimetre : " + res.data[0].perimetre);
-      const blob = new Blob([res.data[0].perimetre], {
-        type: "application/json",
-      });
-      const url = URL.createObjectURL(blob);
-      const geojsonlayer = new GeoJSONLayer({
-        url: url,
-        renderer: {
-          type: "simple",
-          symbol: {
-            type: "simple-fill", // autocasts as new SimpleFillSymbol()
-            color: [255, 255, 255, 0.2],
-            outline: {
-              width: 1.5,
-              color: [255, 255, 255],
-            },
-            style: "solid",
-            // opacity: 0.33,
-          },
-        },
-      });
-      mapLayer.add(geojsonlayer);
+      // const blob = new Blob([res.data[0].perimetre], {
+      //   type: "application/json",
+      // });
+      // const url = URL.createObjectURL(blob);
+      // const geojsonlayer = new GeoJSONLayer({
+      //   url: url,
+      //   renderer: renderer,
+      // });
+      // const statesLabelClass = new LabelClass({
+      //   labelExpressionInfo: { expression: "$feature.nom" },
+      //   symbol: {
+      //     type: "text",
+      //     color: [255, 255, 255, 255], // white
+      //     font: { family: "Arial Unicode MS", size: 10, weight: "bold" },
+      //     haloColor: [0, 0, 0, 255], // black
+      //     haloSize: 1,
+      //   },
+      // });
+      // geojsonlayer.labelingInfo = [statesLabelClass];
+      // mapLayer.add(geojsonlayer);
     });
 
     // URL reference to the blob
@@ -736,6 +952,7 @@ const MyMap = (props) => {
     console.log("FileUploaded 1 :" + FileUploaded);
     reader.readAsText(e.target.files[0]);
   };
+
   const [LayerImportLocal, setLayerImportLocal] = useState(new GeoJSONLayer());
   // const [GrandLat, setGrandLat] = useState(-12);
   // const [PetitLat, setPetitLat] = useState(0);

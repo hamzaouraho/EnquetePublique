@@ -5,7 +5,8 @@
       name="viewport"
       content="initial-scale=1,maximum-scale=1,user-scalable=no"
     />
-    <title>Get length and area</title>
+    <title>GeoJSONLayer | Sample | ArcGIS API for JavaScript 4.23</title>
+
     <style>
       html,
       body,
@@ -15,15 +16,6 @@
         height: 100%;
         width: 100%;
       }
-
-      #measurements {
-        padding: 4px 8px;
-        font-size: 16px;
-        bottom: 15px;
-        left: 50%;
-        margin-right: -50%;
-        transform: translate(-50%, -50%);
-      }
     </style>
 
     <link
@@ -31,250 +23,109 @@
       href="https://js.arcgis.com/4.23/esri/themes/light/main.css"
     />
     <script src="https://js.arcgis.com/4.23/"></script>
+
     <script>
       require([
-        "esri/config",
         "esri/Map",
+        "esri/layers/GeoJSONLayer",
         "esri/views/MapView",
+        "esri/layers/support/LabelClass",
+      ], (Map, GeoJSONLayer, MapView, LabelClass) => {
+        // If GeoJSON files are not on the same domain as your website, a CORS enabled server
+        // or a proxy is required.
+        const url =
+          "https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/all_month.geojson";
 
-        "esri/widgets/ScaleBar",
-        "esri/widgets/Sketch",
-        "esri/Graphic",
-        "esri/layers/GraphicsLayer",
-        "esri/geometry/geometryEngine",
-        "esri/geometry/support/webMercatorUtils",
-        "esri/geometry/geometryEngineAsync",
-        "esri/geometry/Point",
-      ], (
-        esriConfig,
-        Map,
-        MapView,
+        // Paste the url into a browser's address bar to download and view the attributes
+        // in the GeoJSON file. These attributes include:
+        // * mag - magnitude
+        // * type - earthquake or other event such as nuclear test
+        // * place - location of the event
+        // * time - the time of the event
+        // Use the Arcade Date() function to format time field into a human-readable format
 
-        ScaleBar,
-        Sketch,
-        Graphic,
-        GraphicsLayer,
-        geometryEngine,
-        webMercatorUtils,
-        geometryEngineAsync,
-        Point
-      ) => {
-        esriConfig.apiKey = "YOUR_API_KEY";
+        const template = {
+          title: "Earthquake Info",
+          content: "Magnitude {mag} {type} hit {place} on {time}",
+          fieldInfos: [
+            {
+              fieldName: "time",
+              format: {
+                dateFormat: "short-date-short-time",
+              },
+            },
+          ],
+        };
 
+        const renderer = {
+          type: "simple",
+          field: "mag",
+          symbol: {
+            type: "simple-marker",
+            color: "orange",
+            outline: {
+              color: "white",
+            },
+          },
+          visualVariables: [
+            {
+              type: "size",
+              field: "mag",
+              stops: [
+                {
+                  value: 2.5,
+                  size: "4px",
+                },
+                {
+                  value: 8,
+                  size: "40px",
+                },
+              ],
+            },
+          ],
+        };
+        const dataJsn = "";
+        const blob2 = new Blob([props.perimetre[0].perimetre], {
+          type: "application/json",
+        });
+        const url2 = URL.createObjectURL(blob2);
+
+        const geojsonLayer = new GeoJSONLayer({
+          url: url,
+          copyright: "USGS Earthquakes",
+          popupTemplate: template,
+          renderer: renderer,
+          orderBy: {
+            field: "mag",
+          },
+        });
+        const statesLabelClass = new LabelClass({
+          labelExpressionInfo: { expression: "$feature.place" },
+          symbol: {
+            type: "text", // autocasts as new TextSymbol()
+            color: "black",
+            haloSize: 1,
+            haloColor: "white",
+          },
+        });
+        geojsonLayer.labelingInfo = [statesLabelClass];
         const map = new Map({
-          basemap: "satellite", // Basemap layer service
+          basemap: "gray-vector",
+          layers: [geojsonLayer],
         });
 
         const view = new MapView({
           container: "viewDiv",
+          center: [-168, 46],
+          zoom: 2,
           map: map,
-
-          center: [-10, 30],
-          zoom: 3,
         });
-
-        const scalebar = new ScaleBar({
-          view: view,
-          unit: "metric",
-        });
-
-        view.ui.add(scalebar, "bottom-right");
-
-        const graphicsLayer = new GraphicsLayer();
-        map.add(graphicsLayer);
-
-        const sketch = new Sketch({
-          layer: graphicsLayer,
-          view: view,
-          availableCreateTools: ["polyline", "polygon", "rectangle"],
-          creationMode: "update",
-          updateOnGraphicClick: true,
-          visibleElements: {
-            createTools: {
-              point: false,
-              circle: false,
-            },
-            selectionTools: {
-              "lasso-selection": false,
-              "rectangle-selection": false,
-            },
-            settingsMenu: false,
-            undoRedoMenu: false,
-          },
-        });
-        const measurements = document.getElementById("measurements");
-        view.ui.add(measurements, "manual");
-        const polygon = {
-          type: "polygon",
-          spatialReference: {
-            wkid: 4326,
-          },
-          rings: [
-            [
-              [34.065077, -6.799591],
-              [34.064439, -6.79854],
-              [34.063844, -6.799122],
-              [34.064555, -6.800125],
-              [34.063844, -6.799122],
-
-              // [-2629552.6750536393, 3599936.936171892],
-              // [-4508069.082189632, 3599936.936171892],
-            ],
-          ],
-        };
-        const polygonn = {
-          type: "polygon",
-          spatialReference: {
-            wkid: 4326,
-          },
-          rings: [
-            [
-              [34.065077, -6.799591],
-              [34.064439, -6.79854],
-              [34.063844, -6.799122],
-              [34.064555, -6.800125],
-              [34.063844, -6.799122],
-              // [-2629552.6750536393, 3599936.936171892],
-              // [-4508069.082189632, 3599936.936171892],
-            ],
-          ],
-        };
-        const polygon2 = {
-          type: "polygon",
-          spatialReference: {
-            wkid: 3857,
-          },
-          rings: [
-            [
-              webMercatorUtils.lngLatToXY(34.065077, -6.799591),
-              webMercatorUtils.lngLatToXY(34.064439, -6.79854),
-              webMercatorUtils.lngLatToXY(34.063844, -6.799122),
-              webMercatorUtils.lngLatToXY(34.064555, -6.800125),
-              webMercatorUtils.lngLatToXY(34.063844, -6.799122),
-            ],
-          ],
-        };
-        const simplePolygonSymbol = {
-          type: "simple-fill",
-          outline: {
-            color: [200, 0, 0],
-            width: 2,
-          },
-        };
-        const point1 = {
-          type: "point", // autocasts as new Point()
-          longitude: -49.97,
-          latitude: 41.73,
-        };
-        const point2 = {
-          type: "point", // autocasts as new Point()
-          longitude: -59.97,
-          latitude: 41.73,
-        };
-        // const totalDistance = geometryEngine.distance(point1, point2, "feet");
-        // var pointGraphic = new Graphic({
-        //   geometry: Point,
-        //   symbol: simpleMarkerSymbol,
-        //   //*** ADD ***//
-        // });
-        var simpleMarkerSymbol = {
-          type: "simple-marker",
-          color: [46, 204, 113], // Green
-          outline: {
-            color: [255, 255, 255], // white
-            width: 1,
-          },
-        };
-        const Pointtr = {
-          type: "point",
-          longitude: 48.738586,
-          latitude: 24.774265,
-        };
-        const totalDistancee = geometryEngineAsync.distance(
-          Pointtr,
-          Pointtr,
-          "feet"
-        );
-        console.log("distance : " + JSON.stringify(totalDistancee));
-        function getArea(polygon) {
-          // console.log("polygon : " + JSON.stringify(polygon.rings[0]));
-
-          // console.log(
-          //   "polygon : " +
-          //     webMercatorUtils.xyToLngLat(-4508069.082189632, 3599936.936)
-          // );
-          const geodesicArea = geometryEngine.geodesicArea(
-            polygon,
-            "square-meters"
-          );
-          const planarArea = geometryEngine.planarArea(
-            polygon,
-            "square-meters"
-          );
-          console.log(
-            "Geodesic area : " +
-              geodesicArea +
-              " Planar area : " +
-              planarArea.toFixed(2)
-          );
-          measurements.innerHTML =
-            "<b>Geodesic area</b>:  " +
-            geodesicArea +
-            " km\xB2" +
-            " |   <b>Planar area</b>: " +
-            planarArea.toFixed(2) +
-            "  km\xB2";
-        }
-        function switchType(geom) {
-          switch (geom.type) {
-            case "polygon":
-              getArea(geom);
-              break;
-            case "polyline":
-              getLength(geom);
-              break;
-            default:
-              console.log("No value found");
-          }
-        }
-        const polygonGraphic = new Graphic({
-          geometry: polygon,
-          symbol: simplePolygonSymbol,
-        });
-
-        graphicsLayer.add(polygonGraphic);
-        view.when(() => {
-          sketch.update(polygonGraphic);
-          getArea(polygonGraphic.geometry);
-        });
-        sketch.on("update", (e) => {
-          const geometry = e.graphics[0].geometry;
-
-          if (e.state === "start") {
-            switchType(geometry);
-          }
-
-          if (e.state === "complete") {
-            graphicsLayer.remove(graphicsLayer.graphics.getItemAt(0));
-            measurements.innerHTML = null;
-          }
-
-          if (
-            e.toolEventInfo &&
-            (e.toolEventInfo.type === "scale-stop" ||
-              e.toolEventInfo.type === "reshape-stop" ||
-              e.toolEventInfo.type === "move-stop")
-          ) {
-            switchType(geometry);
-          }
-        });
-        getArea(polygon2);
       });
     </script>
   </head>
+
   <body>
-    <div id="viewDiv">
-      <div id="measurements" class="esri-widget"></div>
-    </div>
+    undefined
+    <div id="viewDiv"></div>
   </body>
 </html>

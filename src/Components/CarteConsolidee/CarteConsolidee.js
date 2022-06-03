@@ -6,6 +6,7 @@ import GeoJSONLayer from "@arcgis/core/layers/GeoJSONLayer";
 import { AiFillFilter } from "react-icons/ai";
 import { FaFileExport } from "react-icons/fa";
 import { PDFExport, savePDF } from "@progress/kendo-react-pdf";
+import LabelClass from "@arcgis/core/layers/support/LabelClass";
 // import Sketch from "@arcgis/core/widgets/Sketch";
 import GraphicsLayer from "@arcgis/core/layers/GraphicsLayer";
 import axios from "axios";
@@ -40,8 +41,8 @@ export default function CarteConsolidee() {
   //     basemap: "satellite",
   //     layers: [graphicsLayer],
   //   });
-
-  const createGraphic = (graphic, color) => {
+  const createGraphicForPA = (graphic, color) => {
+    console.log("graphic : " + graphic);
     const blob2 = new Blob([graphic], {
       type: "application/json",
     });
@@ -54,7 +55,38 @@ export default function CarteConsolidee() {
           type: "simple-fill", // autocasts as new SimpleFillSymbol()
           color: hexToRgb(color),
           outline: {
-            width: 1.5,
+            width: 0.5,
+            color: "black",
+          },
+          style: "solid",
+          // opacity: 0.33,
+        },
+      },
+      // popupTemplate: {
+      //   title: "Commentaire Citoyen",
+      //   content:
+      //     "<h4> Nom : $feature.name </h4>\n<h4> Commentaire : {commentaire} </h4>  ",
+      // },
+    });
+    // mapLayer.add(geojsonlayer);
+    MapLayers.add(geojsonlayer2);
+  };
+
+  const createGraphic = (graphic, color) => {
+    console.log("graphic : " + graphic);
+    const blob2 = new Blob([graphic], {
+      type: "application/json",
+    });
+    const url2 = URL.createObjectURL(blob2);
+    const geojsonlayer2 = new GeoJSONLayer({
+      url: url2,
+      renderer: {
+        type: "simple",
+        symbol: {
+          type: "simple-fill", // autocasts as new SimpleFillSymbol()
+          color: hexToRgb(color),
+          outline: {
+            width: 2.5,
             color: "red",
           },
           style: "solid",
@@ -62,8 +94,9 @@ export default function CarteConsolidee() {
         },
       },
       popupTemplate: {
-        title: "Commentaire",
-        content: "<h4> Commentaire : {commentaire} </h4>  ",
+        title: "Commentaire Citoyen",
+        content:
+          "<h4> Nom : {name} </h4>\n<h4> Commentaire : {commentaire} </h4>  ",
       },
     });
     // mapLayer.add(geojsonlayer);
@@ -90,18 +123,179 @@ export default function CarteConsolidee() {
     return color;
   }
   const showLayerById = (id) => {
+    ////////////// call PA Layers
+    let statesLabelClass = new LabelClass();
+    let Layers = [];
+    const tabl = [];
+    axios.get("http://127.0.0.1:8000/api/etudes/" + id).then((res) => {
+      // console.log("res.data : " + JSON.stringify(res.data[0].perimetre));
+      if (res.data[0].perimetre.includes("%pablo144%")) {
+        Layers = res.data[0].perimetre.split("%pablo144%");
+      } else {
+        Layers = res.data[0].perimetre;
+      }
+      if (Array.isArray(Layers)) {
+        Layers.map((layer) => {
+          if (JSON.parse(layer).name == "ZONAGE") {
+            statesLabelClass = new LabelClass({
+              labelExpressionInfo: { expression: "$feature.NAME" },
+              symbol: {
+                type: "text",
+                color: [255, 255, 255, 255], // white
+                font: { family: "Arial Unicode MS", size: 10, weight: "bold" },
+                haloColor: [0, 0, 0, 255], // black
+                haloSize: 1,
+              },
+            });
+          } else if (JSON.parse(layer).name == "EQUIPEMENTS") {
+            statesLabelClass = new LabelClass({
+              labelExpressionInfo: { expression: "$feature.NOM" },
+              symbol: {
+                type: "text",
+                color: [255, 255, 255, 255], // white
+                font: { family: "Arial Unicode MS", size: 10, weight: "bold" },
+                haloColor: [0, 0, 0, 255], // black
+                haloSize: 1,
+              },
+            });
+          } else {
+            statesLabelClass = new LabelClass({
+              labelExpressionInfo: { expression: "$feature.nom" },
+              symbol: {
+                type: "text",
+                color: [255, 255, 255, 255], // white
+                font: { family: "Arial Unicode MS", size: 10, weight: "bold" },
+                haloColor: [0, 0, 0, 255], // black
+                haloSize: 1,
+              },
+            });
+          }
+          JSON.parse(layer).features.map((graphic) => {
+            graphic.geometry.coordinates[0].map((coordonne) =>
+              tab.push(coordonne)
+            );
+          });
+          const blob2 = new Blob([layer], {
+            type: "application/json",
+          });
+          const url2 = URL.createObjectURL(blob2);
+          const geojsonlayer2 = new GeoJSONLayer({
+            url: url2,
+            renderer: {
+              type: "simple",
+              symbol: {
+                type: "simple-fill", // autocasts as new SimpleFillSymbol()
+                // color: `${generateColors()}`,
+                color: hexToRgb(getRandomColor()),
+                outline: {
+                  width: 1.5,
+                  color: "black",
+                },
+                style: "solid",
+                // opacity: 0.33,
+              },
+            },
+            // popupTemplate: {
+            //   title: "Commentaire",
+            //   content: "Magnitude {fill},,$feature.fill  hit {nom} ",
+            // },
+          });
+
+          geojsonlayer2.labelingInfo = [statesLabelClass];
+          MapLayers.add(geojsonlayer2);
+        });
+      } else {
+        if (JSON.parse(Layers).name == "ZONAGE") {
+          statesLabelClass = new LabelClass({
+            labelExpressionInfo: { expression: "$feature.NAME" },
+            symbol: {
+              type: "text",
+              color: [255, 255, 255, 255], // white
+              font: { family: "Arial Unicode MS", size: 10, weight: "bold" },
+              haloColor: [0, 0, 0, 255], // black
+              haloSize: 1,
+            },
+          });
+        } else if (JSON.parse(Layers).name == "EQUIPEMENTS") {
+          statesLabelClass = new LabelClass({
+            labelExpressionInfo: { expression: "$feature.NOM" },
+            symbol: {
+              type: "text",
+              color: [255, 255, 255, 255], // white
+              font: { family: "Arial Unicode MS", size: 10, weight: "bold" },
+              haloColor: [0, 0, 0, 255], // black
+              haloSize: 1,
+            },
+          });
+        } else {
+          statesLabelClass = new LabelClass({
+            labelExpressionInfo: { expression: "$feature.nom" },
+            symbol: {
+              type: "text",
+              color: [255, 255, 255, 255], // white
+              font: { family: "Arial Unicode MS", size: 10, weight: "bold" },
+              haloColor: [0, 0, 0, 255], // black
+              haloSize: 1,
+            },
+          });
+        }
+        JSON.parse(Layers).features.map((graphic) => {
+          graphic.geometry.coordinates[0].map((coordonne) =>
+            tab.push(coordonne)
+          );
+        });
+        const blob2 = new Blob([Layers], {
+          type: "application/json",
+        });
+        const url2 = URL.createObjectURL(blob2);
+        const geojsonlayer2 = new GeoJSONLayer({
+          url: url2,
+          renderer: {
+            type: "simple",
+            symbol: {
+              type: "simple-fill", // autocasts as new SimpleFillSymbol()
+              // color: `${generateColors()}`,
+              color: hexToRgb(getRandomColor()),
+              outline: {
+                width: 1.5,
+                color: "black",
+              },
+              style: "solid",
+              // opacity: 0.33,
+            },
+          },
+          // popupTemplate: {
+          //   title: "Commentaire",
+          //   content: "Magnitude {fill},,$feature.fill  hit {nom} ",
+          // },
+        });
+
+        geojsonlayer2.labelingInfo = [statesLabelClass];
+        MapLayers.add(geojsonlayer2);
+      }
+      Promise.all(tabl).then(() => {
+        viewGlob.goTo({
+          center: [tabl],
+        });
+      });
+    });
+    ////////////////////
     let urldata = "";
     urldata = "http://127.0.0.1:8000/api/situations/" + id;
     MapLayers.removeAll();
     // mapLayer.removeAll();
     // console.log("url : " + urldata);
     const tab = [];
-    console.log("salam : " + id);
+    // console.log("salamo3alikom : " + id);
     setexportData("");
+    // axios.get("http://127.0.0.1:8000/api/etudes/" + id).then((res) => {
+    //   createGraphic(res.data[0].perimetre, getRandomColor());
+    //   // console.log("toto : " + res.data[0].perimetre);
+    // });
     axios.get(urldata).then((res) => {
       res.data
         .filter((a) => {
-          console.log("a.nom.toLowerCase() : " + JSON.stringify(a) + ", ");
+          // console.log("a.nom.toLowerCase() : " + JSON.stringify(a) + ", ");
           setexportpdfData([]);
           if (TFCitoyen == "" && CommentaireCitoyen == "" && NomCitoyen == "") {
             return a;
@@ -118,7 +312,7 @@ export default function CarteConsolidee() {
         })
         .map((a) =>
           createGraphic(a["situation"], getRandomColor()) ||
-          console.log("aaaaa : " + JSON.stringify(a)) ||
+          // console.log("aaaaa : " + JSON.stringify(a)) ||
           setexportpdfData((last) => [
             ...last,
             {
@@ -141,7 +335,9 @@ export default function CarteConsolidee() {
                   setexportData((oldArray) =>
                     oldArray != ""
                       ? oldArray + "," + JSON.stringify(a)
-                      : '{"type": "FeatureCollection","features": [' +
+                      : '{"type": "FeatureCollection","name": "' +
+                        a.nom +
+                        '","features": [' +
                         JSON.stringify(a)
                   )
                 )

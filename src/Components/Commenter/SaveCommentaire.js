@@ -98,7 +98,8 @@ export default function SaveCommentaire(props, saveButtonV) {
     const element = document.createElement("a");
     // console.log("e : " + e);
     // console.log("comment : " + e["comment"]);
-    let geojsonFile = '{"type": "FeatureCollection","features": [';
+    let geojsonFile =
+      '{"type": "FeatureCollection","name": "' + NomCytoyen + '","features": [';
 
     geojsonFile =
       geojsonFile +
@@ -125,15 +126,16 @@ export default function SaveCommentaire(props, saveButtonV) {
   const getGeojsonOne = (FinalEntities) => {
     const element = document.createElement("a");
 
-    let geojsonFile = '{"type": "FeatureCollection","features": [';
+    let geojsonFile =
+      '{"type": "FeatureCollection","name": "' + NomCytoyen + '","features": [';
     Promise.all(
       FinalEntities.map(
         (a) =>
           (geojsonFile =
             geojsonFile +
-            '{"type": "Feature","properties": {"commentaire": "' +
-            // a["titre"] +
-            // '", "commentaire" : "' +
+            '{"type": "Feature","properties": {"name": "' +
+            NomCytoyen +
+            '", "commentaire" : "' +
             a["comment"] +
             '"},"geometry": {"type": "Polygon","coordinates": [[') |
           a["data"].map(
