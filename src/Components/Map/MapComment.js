@@ -85,6 +85,7 @@ const MyMap = (props) => {
       },
     ],
   };
+
   function hexToRgb(hex) {
     var result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
     return result
@@ -96,6 +97,7 @@ const MyMap = (props) => {
         }
       : null;
   }
+
   function getRandomColor() {
     var letters = "0123456789ABCDEF";
     var color = "#";
@@ -105,6 +107,34 @@ const MyMap = (props) => {
     // color += "c9";
     return color;
   }
+  function hexToRgba(hex) {
+    var result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+    //
+    return result
+      ? "rgba(" +
+          parseInt(result[1], 16) +
+          "," +
+          parseInt(result[2], 16) +
+          "," +
+          parseInt(result[3], 16) +
+          ",0.41)"
+      : null;
+  }
+  let colorhex = "";
+  let colors = [
+    "rgba(30, 122, 46, 0.41)",
+    "rgba(15 ,136 ,251, 0.41)",
+    "rgba(241, 253, 13, 0.41)",
+  ];
+  const getColor = (i) => {
+    if (i > 2) {
+      console.log("random color");
+      colorhex = hexToRgba(getRandomColor());
+    } else {
+      colorhex = colors[i];
+    }
+    return colorhex;
+  };
   useEffect(() => {
     const urlAPI = "http://127.0.0.1:8000/api/etudes/" + props.id;
     const graphicsLayer = new GraphicsLayer();
@@ -133,7 +163,7 @@ const MyMap = (props) => {
         Layers = res.data[0].perimetre;
       }
       if (Array.isArray(Layers)) {
-        Layers.map((layer) => {
+        Layers.map((layer, index) => {
           if (JSON.parse(layer).name == "ZONAGE") {
             statesLabelClass = new LabelClass({
               labelExpressionInfo: { expression: "$feature.NAME" },
@@ -184,7 +214,7 @@ const MyMap = (props) => {
               symbol: {
                 type: "simple-fill", // autocasts as new SimpleFillSymbol()
                 // color: `${generateColors()}`,
-                color: hexToRgb(getRandomColor()),
+                color: getColor(index),
                 outline: {
                   width: 1.5,
                   color: "black",
@@ -862,26 +892,6 @@ const MyMap = (props) => {
                     )[1],
                   ];
                 }),
-
-                // [
-                //   entities["data"].map((entity) => [
-                //     webMercatorUtils.xyToLngLat(entity["lat"], entity["long"])[1] ||
-                //       webMercatorUtils.xyToLngLat(entity["lat"], entity["long"])[0],
-                //     // JSON.stringify(
-                //     //   "[" +
-                //     //     webMercatorUtils.xyToLngLat(
-                //     //       entity["lat"],
-                //     //       entity["long"]
-                //     //     )[1] +
-                //     //     "," +
-                //     //     webMercatorUtils.xyToLngLat(
-                //     //       entity["lat"],
-                //     //       entity["long"]
-                //     //     )[1] +
-                //     //     "]"
-                //     // ),
-                //   ]),
-                // ],
               ],
             },
             symbol: {

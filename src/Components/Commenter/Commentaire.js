@@ -69,16 +69,6 @@ export default function Commentaire(props) {
           }}
         >
           <li>
-            {/* <label style={{ color: "white" }}>
-              Type <span class="required">*</span>
-            </label>
-            <input
-              type="text"
-              name="field1"
-              class="field-long"
-              placeholder="Titre"
-              onChange={handleTitre}
-            /> */}
             <label style={{ color: "white" }}>
               Your Message <span class="required">*</span>
             </label>

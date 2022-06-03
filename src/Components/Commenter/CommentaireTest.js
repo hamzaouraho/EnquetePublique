@@ -20,6 +20,7 @@ export default function CommentaireTest(props, CommentActionn) {
     e.preventDefault();
     props.deleteComment({ action: "delete", data: props.data });
   };
+
   return (
     <div
       style={{
