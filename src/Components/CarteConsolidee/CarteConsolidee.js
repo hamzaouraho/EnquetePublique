@@ -42,7 +42,7 @@ export default function CarteConsolidee() {
   //     layers: [graphicsLayer],
   //   });
   const createGraphicForPA = (graphic, color) => {
-    console.log("graphic : " + graphic);
+    // console.log("graphic : " + graphic);
     const blob2 = new Blob([graphic], {
       type: "application/json",
     });
@@ -73,7 +73,7 @@ export default function CarteConsolidee() {
   };
 
   const createGraphic = (graphic, color) => {
-    console.log("graphic : " + graphic);
+    // console.log("graphic : " + graphic);
     const blob2 = new Blob([graphic], {
       type: "application/json",
     });
@@ -144,7 +144,7 @@ export default function CarteConsolidee() {
   ];
   const getColor = (i) => {
     if (i > 2) {
-      console.log("random color");
+      // console.log("random color");
       colorhex = hexToRgba(getRandomColor());
     } else {
       colorhex = colors[i];
@@ -393,7 +393,7 @@ export default function CarteConsolidee() {
 
     // MapLayers.removeAll();
     axios.get("http://127.0.0.1:8000/api/etudes").then((res) => {
-      res.data.map((a) => console.log("etude 1 : " + JSON.stringify(a.titre)));
+      // res.data.map((a) => console.log("etude 1 : " + JSON.stringify(a.titre)));
       //   console.log("res.data : " + JSON.stringify(res.data));
       setetudes(res.data);
     });
@@ -459,47 +459,48 @@ export default function CarteConsolidee() {
 
   return (
     <>
-      <div className="divBox">
-        <div
-          style={{
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            flexDirection: "column",
-            margin: "25px 25px 5px 25px",
-          }}
-        >
-          <div style={{ width: "800px", display: "flex" }}>
-            <select
-              value={selectedLayer}
-              onChange={(e) =>
-                showLayerById(e.target.value) ||
-                setselectedLayer(e.target.value)
-              }
-              class="form-select"
-            >
-              <option key="" value="">
-                Toutes les Etudes
-              </option>
-              {etudes
-                ? etudes.map((a) => (
-                    <option key={a.id} value={a.id}>
-                      {a.titre}
-                    </option>
-                  ))
-                : null}
-            </select>
-            <button
-              className="iconButton"
-              onClick={() => setshowFilter(!showFilter)}
-            >
-              <AiFillFilter color="dark" size="1rem" />
-            </button>
-            <button className="iconButton" onClick={exportFile}>
-              <FaFileExport color="dark" size="1.2rem" />
-            </button>
-            {/* <div class="text-center" style={{ margin: "20px" }}> */}
-            {/* <button
+      <div>
+        <div className="divBox">
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              flexDirection: "column",
+              margin: "25px 25px 5px 25px",
+            }}
+          >
+            <div style={{ width: "800px", display: "flex" }}>
+              <select
+                value={selectedLayer}
+                onChange={(e) =>
+                  showLayerById(e.target.value) ||
+                  setselectedLayer(e.target.value)
+                }
+                class="form-select"
+              >
+                <option key="" value="">
+                  Toutes les Etudes
+                </option>
+                {etudes
+                  ? etudes.map((a) => (
+                      <option key={a.id} value={a.id}>
+                        {a.titre}
+                      </option>
+                    ))
+                  : null}
+              </select>
+              <button
+                className="iconButton"
+                onClick={() => setshowFilter(!showFilter)}
+              >
+                <AiFillFilter color="dark" size="1rem" />
+              </button>
+              <button className="iconButton" onClick={exportFile}>
+                <FaFileExport color="dark" size="1.2rem" />
+              </button>
+              {/* <div class="text-center" style={{ margin: "20px" }}> */}
+              {/* <button
               type="button"
               style={{ margin: "0px 20px" }}
               class="btn btn-primary"
@@ -507,88 +508,97 @@ export default function CarteConsolidee() {
             >
               Download Image
             </button> */}
-            <button
-              type="button"
-              class="btn btn-primary"
-              onClick={exportPDFWithComponent}
-              style={{
-                margin: "0px 20px",
-                color: "#fff",
-                backgroundColor: "#97afd2",
-                borderColor: "#97afd2",
-              }}
-            >
-              Export pdf
-            </button>
-            {/* </div> */}
-            {/* <AiFillFilter></AiFillFilter> */}
-          </div>
-          {showFilter ? (
-            <div style={{ marginTop: "18px" }}>
-              <div class="form-row ">
-                <div class="form-group col-md-4 col-sm-6">
-                  <label for="input4">Nom</label>
-                  <input
-                    type="text"
-                    class="form-control"
-                    placeholder="Nom"
-                    onChange={(e) =>
-                      setNomCitoyen(e.target.value) ||
-                      showLayerById(selectedLayer)
-                    }
-                  />
-                </div>
-                <div class="form-group col-md-4 col-sm-6">
-                  <label for="input4">Titre Foncier</label>
-                  <input
-                    type="text"
-                    class="form-control"
-                    placeholder="TF"
-                    onChange={(e) =>
-                      setTFCitoyen(e.target.value) ||
-                      showLayerById(selectedLayer)
-                    }
-                  />
-                </div>
-                <div class="form-group col-md-4 col-sm-6">
-                  <label for="input4">Commentaire</label>
-                  <input
-                    type="text"
-                    class="form-control"
-                    placeholder="Commentaire"
-                    onChange={(e) =>
-                      setCommentaireCitoyen(e.target.value) ||
-                      showLayerById(selectedLayer)
-                    }
-                  />
+              <button
+                type="button"
+                class="btn btn-primary"
+                onClick={exportPDFWithComponent}
+                style={{
+                  margin: "0px 20px",
+                  color: "#fff",
+                  backgroundColor: "#97afd2",
+                  borderColor: "#97afd2",
+                }}
+              >
+                Export pdf
+              </button>
+              {/* </div> */}
+              {/* <AiFillFilter></AiFillFilter> */}
+            </div>
+            {showFilter ? (
+              <div style={{ marginTop: "18px" }}>
+                <div class="form-row ">
+                  <div class="form-group col-md-4 col-sm-6">
+                    <label for="input4">Nom</label>
+                    <input
+                      type="text"
+                      class="form-control"
+                      placeholder="Nom"
+                      onChange={(e) =>
+                        setNomCitoyen(e.target.value) ||
+                        showLayerById(selectedLayer)
+                      }
+                    />
+                  </div>
+                  <div class="form-group col-md-4 col-sm-6">
+                    <label for="input4">Titre Foncier</label>
+                    <input
+                      type="text"
+                      class="form-control"
+                      placeholder="TF"
+                      onChange={(e) =>
+                        setTFCitoyen(e.target.value) ||
+                        showLayerById(selectedLayer)
+                      }
+                    />
+                  </div>
+                  <div class="form-group col-md-4 col-sm-6">
+                    <label for="input4">Commentaire</label>
+                    <input
+                      type="text"
+                      class="form-control"
+                      placeholder="Commentaire"
+                      onChange={(e) =>
+                        setCommentaireCitoyen(e.target.value) ||
+                        showLayerById(selectedLayer)
+                      }
+                    />
+                  </div>
                 </div>
               </div>
-            </div>
-          ) : null}
-        </div>
-        <div>
-          <div
-            className="map-container"
-            style={{
-              height: "600px",
-              width: "94%",
-              margin: " 20px 50px 50px 50px",
-            }}
-          >
-            <div className="map-frame">
-              <div ref={mapRef} id="map"></div>
+            ) : null}
+          </div>
+          <div>
+            <div
+              className="map-container"
+              style={{
+                height: "600px",
+                width: "94%",
+                margin: " 20px 50px 50px 50px",
+              }}
+            >
+              <div className="map-frame">
+                <div ref={mapRef} id="map"></div>
+              </div>
             </div>
           </div>
         </div>
-      </div>
-
-      <div className="divBox" style={{ marginTop: "100px" }}>
-        <PDFExport
-          ref={pdfExportComponent}
-          forcePageBreak=".page-break"
-          paperSize="A4"
+        <div
+          style={{
+            position: "absolute",
+            left: "-10000px",
+            top: 0,
+          }}
         >
-          {/* <div
+          <div
+            className="divBox"
+            style={{ marginTop: "100px", width: "1638px" }}
+          >
+            <PDFExport
+              ref={pdfExportComponent}
+              forcePageBreak=".page-break"
+              paperSize="A4"
+            >
+              {/* <div
             style={{
               margin: "5px 50px",
               display: "none",
@@ -596,31 +606,34 @@ export default function CarteConsolidee() {
           >
             <img className="imglogo" src={logo} />
           </div> */}
-          <div
-            style={{
-              margin: "5px 50px",
-              fontSize: "8px",
-            }}
-          >
-            <div>
-              <div>
-                {exportpdfData
-                  ? exportpdfData.map(
-                      (a) =>
-                        console.log("error :" + JSON.stringify(a)) || (
-                          <PDFComponent data={a} />
-                        )
-                    )
-                  : console.log("error :" + exportpdfData)}
-                {/* {exportpdfData ? <pdf /> : null} */}
-                {/* {exportpdfData.map((a) => {
+              <div
+                style={{
+                  margin: "5px 50px",
+                  fontSize: "8px",
+                }}
+              >
+                <div>
+                  <div>
+                    {exportpdfData
+                      ? exportpdfData.map((a, index) => (
+                          <PDFComponent
+                            data={a}
+                            nbrpage={exportpdfData.length}
+                            indexNbr={{ index }}
+                          />
+                        ))
+                      : console.log("error :" + exportpdfData)}
+                    {/* {exportpdfData ? <pdf /> : null} */}
+                    {/* {exportpdfData.map((a) => {
                 <pdf />;
                 
               })} */}
+                  </div>
+                </div>
               </div>
-            </div>
+            </PDFExport>
           </div>
-        </PDFExport>
+        </div>
       </div>
 
       {/* <testExportpdf /> */}

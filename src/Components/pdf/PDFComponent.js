@@ -4,7 +4,10 @@ import ihamzaCV from "../CarteConsolidee/cvPhoto.png";
 import logo from "../CarteConsolidee/logo.png";
 export default function PDFComponent(props) {
   const domEl = useRef(null);
-
+  console.log("nbrpage " + JSON.stringify(props.nbrpage));
+  console.log(
+    "indexNbr : " + (parseInt(JSON.stringify(props.indexNbr.index)) + 1)
+  );
   const downloadImage = async () => {
     const dataUrl = await htmlToImage.toPng(domEl.current);
 
@@ -78,8 +81,11 @@ export default function PDFComponent(props) {
               <td colspan="6" rowspan="6"></td>
             </tr>
           </table>
-          <p className="page-break" />
-
+          {parseInt(JSON.stringify(props.indexNbr.index)) + 1 !==
+          parseInt(JSON.stringify(props.nbrpage)) ? (
+            <p className="page-break" />
+          ) : null}
+          {/* if({props.indexNbr}!={props.nbrpage}){<p className="page-break" />} */}
           {/* <h3>Convert HTML element or document into Image in React</h3> */}
         </div>
       </div>
