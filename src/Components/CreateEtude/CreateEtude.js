@@ -27,7 +27,11 @@ export default function CreateEtude() {
   const [toshowThatDeletedLayer, settoshowThatDeletedLayer] = useState("");
   let navigate = useNavigate();
   let renderer = {};
-
+  const typagelayers = [
+    "Ajouter couche Zonage",
+    "Ajouter couche Equipement",
+    "Ajouter couche voirie",
+  ];
   function hexToRgb(hex) {
     var result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
     //
@@ -597,7 +601,7 @@ export default function CreateEtude() {
             </div>
             <div class="form-row">
               <div class="form-group col-md-6">
-                <label for="inputEmail4">dateDebut</label>
+                <label for="inputEmail4">Date Début</label>
                 <input
                   type="text"
                   class="form-control"
@@ -652,6 +656,15 @@ export default function CreateEtude() {
           // className="HideImportButton"
           className={ImportbuttonHide ? "ShowImportButton" : "HideImportButton"}
         >
+          <h5 style={{ color: "#2c2b5e" }}>
+            {divLayerSHowed.length == 0
+              ? typagelayers[0]
+              : divLayerSHowed.length == 1
+              ? typagelayers[1]
+              : divLayerSHowed.length == 2
+              ? typagelayers[2]
+              : "Add layer"}
+          </h5>
           <input
             type="file"
             onChange={showFileData}
