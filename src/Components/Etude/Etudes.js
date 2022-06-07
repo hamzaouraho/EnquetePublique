@@ -63,10 +63,11 @@ export default function Etudes() {
   const [TypeDoc, setTypeDoc] = useState("");
   const [Filter, setFilter] = useState(false);
 
-  const url = "http://127.0.0.1:8000/api/etudes";
+  const url = "http://127.0.0.1:8090/etudes";
 
   useEffect(() => {
     axios.get(url).then((res) => {
+      console.log("res : " + res);
       res.data.map((a) => console.log(a));
       setetudes(res.data);
       console.log(etudes);

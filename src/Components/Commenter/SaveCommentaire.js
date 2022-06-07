@@ -10,7 +10,7 @@ export default function SaveCommentaire(props, saveButtonV) {
   const [TF, setTF] = useState("");
   const [Commentaire, setCommentaire] = useState("-");
   const [saveButtonValue, setsaveButtonValue] = useState(true);
-  const url = "http://127.0.0.1:8000/api/etudes";
+  const url = "http://127.0.0.1:8090/etudes";
   const stock = "aa";
 
   // props.data
@@ -208,7 +208,7 @@ export default function SaveCommentaire(props, saveButtonV) {
     if (distanceLong > 500 || distanceLat > 500) {
       props.data.map((a) => {
         axios
-          .post("http://127.0.0.1:8000/api/createRequete", {
+          .post("http://127.0.0.1:8090/createRequete", {
             nom: NomCytoyen,
             tf: TF,
             page: Page,
@@ -228,7 +228,7 @@ export default function SaveCommentaire(props, saveButtonV) {
       });
     } else {
       axios
-        .post("http://127.0.0.1:8000/api/createRequete", {
+        .post("http://127.0.0.1:8090/createRequete", {
           nom: NomCytoyen,
           tf: TF,
           page: Page,

@@ -136,7 +136,7 @@ const MyMap = (props) => {
     return colorhex;
   };
   useEffect(() => {
-    const urlAPI = "http://127.0.0.1:8000/api/etudes/" + props.id;
+    const urlAPI = "http://127.0.0.1:8090/etudes/" + props.id;
     const graphicsLayer = new GraphicsLayer();
     const mapLayer = new Map({
       basemap: "satellite",

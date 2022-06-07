@@ -25,7 +25,7 @@ export default function CarteConsolidee() {
   const [CommentaireCitoyen, setCommentaireCitoyen] = useState("");
   const [exportData, setexportData] = useState("");
   const mapRef = useRef(null);
-  const [url, seturl] = useState("http://127.0.0.1:8000/api/situations");
+  const [url, seturl] = useState("http://127.0.0.1:8090/situations");
   const graphicsLayer = new GraphicsLayer();
   const pdfExportComponent = React.useRef(null);
   const [exportpdfData, setexportpdfData] = useState([]);
@@ -156,7 +156,7 @@ export default function CarteConsolidee() {
     let statesLabelClass = new LabelClass();
     let Layers = [];
     const tabl = [];
-    axios.get("http://127.0.0.1:8000/api/etudes/" + id).then((res) => {
+    axios.get("http://127.0.0.1:8090/etudes/" + id).then((res) => {
       // console.log("res.data : " + JSON.stringify(res.data[0].perimetre));
       if (res.data[0].perimetre.includes("%pablo144%")) {
         Layers = res.data[0].perimetre.split("%pablo144%");
@@ -310,14 +310,14 @@ export default function CarteConsolidee() {
     });
     ////////////////////
     let urldata = "";
-    urldata = "http://127.0.0.1:8000/api/situations/" + id;
+    urldata = "http://127.0.0.1:8090/situations/" + id;
     MapLayers.removeAll();
     // mapLayer.removeAll();
     // console.log("url : " + urldata);
     const tab = [];
     // console.log("salamo3alikom : " + id);
     setexportData("");
-    // axios.get("http://127.0.0.1:8000/api/etudes/" + id).then((res) => {
+    // axios.get("http://127.0.0.1:8090/etudes/" + id).then((res) => {
     //   createGraphic(res.data[0].perimetre, getRandomColor());
     //   // console.log("toto : " + res.data[0].perimetre);
     // });
@@ -392,7 +392,7 @@ export default function CarteConsolidee() {
     showLayerById("");
 
     // MapLayers.removeAll();
-    axios.get("http://127.0.0.1:8000/api/etudes").then((res) => {
+    axios.get("http://127.0.0.1:8090/etudes").then((res) => {
       // res.data.map((a) => console.log("etude 1 : " + JSON.stringify(a.titre)));
       //   console.log("res.data : " + JSON.stringify(res.data));
       setetudes(res.data);

@@ -285,9 +285,9 @@ export default function CreateEtude() {
       }
     });
     // Allpermeteres = Allpermeteres + "}";
-    console.log(Allpermeteres);
+    console.log(Titre, Intitule);
     axios
-      .post("http://127.0.0.1:8000/api/createEtude", {
+      .post("http://127.0.0.1:8090/createEtude", {
         titre: Titre,
         typeDoc: TD,
         intitule: Intitule,

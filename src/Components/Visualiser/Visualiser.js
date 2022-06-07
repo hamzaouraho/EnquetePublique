@@ -8,7 +8,7 @@ export default function Visualiser() {
   const { id } = useParams();
   const [perimetre, setperimetre] = useState(null);
 
-  const url = "http://127.0.0.1:8000/api/visualiser/" + id;
+  const url = "http://127.0.0.1:8090/visualiser/" + id;
 
   useEffect(() => {
     axios.get(url).then((res) => {
