@@ -56,6 +56,9 @@
 .HideImportButton {
   display: none;
 }
+.HideImportButtonLoad {
+  display: none;
+}
 
 /* CSS */
 .button-16 {

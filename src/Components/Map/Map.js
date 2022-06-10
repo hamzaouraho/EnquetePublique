@@ -224,7 +224,7 @@ const MyMap = (props) => {
           symbol: {
             type: "simple-fill", // autocasts as new SimpleFillSymbol()
             // color: `${generateColors()}`,
-            color: hexToRgb(getRandomColor()),
+            color: getColor(0),
             outline: {
               width: 1.5,
               color: "black",

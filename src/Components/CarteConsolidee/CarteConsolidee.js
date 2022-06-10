@@ -153,6 +153,7 @@ export default function CarteConsolidee() {
   };
   const showLayerById = (id) => {
     ////////////// call PA Layers
+    console.log("iddddddddddddddddd :" + id);
     let statesLabelClass = new LabelClass();
     let Layers = [];
     const tabl = [];
@@ -201,7 +202,7 @@ export default function CarteConsolidee() {
           }
           JSON.parse(layer).features.map((graphic) => {
             graphic.geometry.coordinates[0].map((coordonne) =>
-              tab.push(coordonne)
+              tabl.push(coordonne)
             );
           });
           const blob2 = new Blob([layer], {
@@ -234,6 +235,7 @@ export default function CarteConsolidee() {
           MapLayers.add(geojsonlayer2);
         });
       } else {
+        console.log("JSON.parse(Layers).name : " + JSON.parse(Layers).name);
         if (JSON.parse(Layers).name == "ZONAGE") {
           statesLabelClass = new LabelClass({
             labelExpressionInfo: { expression: "$feature.NAME" },
@@ -270,7 +272,7 @@ export default function CarteConsolidee() {
         }
         JSON.parse(Layers).features.map((graphic) => {
           graphic.geometry.coordinates[0].map((coordonne) =>
-            tab.push(coordonne)
+            tabl.push(coordonne)
           );
         });
         const blob2 = new Blob([Layers], {
@@ -284,7 +286,7 @@ export default function CarteConsolidee() {
             symbol: {
               type: "simple-fill", // autocasts as new SimpleFillSymbol()
               // color: `${generateColors()}`,
-              color: hexToRgb(getRandomColor()),
+              color: getColor(0),
               outline: {
                 width: 1.5,
                 color: "black",
@@ -376,10 +378,10 @@ export default function CarteConsolidee() {
       setexportData((oldArray) => oldArray + "]}");
       //   console.log("res.data : " + JSON.stringify(res.data));
       //   console.log("tab : " + tab);
-      viewGlob.goTo({
-        center: [tab],
-        // zoom: 13,
-      });
+      // viewGlob.goTo({
+      //   center: [tab],
+      //   // zoom: 13,
+      // });
       //   console.log(res.data[0]["situation"]);
       //   createGraphic(res.data[0]["situation"]);
       //   console.log(res);

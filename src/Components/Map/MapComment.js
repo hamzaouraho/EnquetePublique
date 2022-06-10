@@ -283,7 +283,7 @@ const MyMap = (props) => {
             symbol: {
               type: "simple-fill", // autocasts as new SimpleFillSymbol()
               // color: `${generateColors()}`,
-              color: hexToRgb(getRandomColor()),
+              color: getColor(0),
               outline: {
                 width: 1.5,
                 color: "black",
@@ -481,6 +481,7 @@ const MyMap = (props) => {
       setShowAddComment(false);
       deleteAllGraphics();
       viewGlob.graphics.removeAll();
+      saveRequeteButton == true ? setsaveRequeteButton(false) : console.log();
       // console.log(
       //   "[...FinalEntities, data] : " + JSON.stringify([...FinalEntities, data])
       // );
@@ -1291,9 +1292,12 @@ const MyMap = (props) => {
               </button>
             </div>
             <div>
+              {console.log("id idididididid : " + props.id)}
               {saveRequeteButton ? (
                 <SaveCommentaire
-                  saveButtonV={(value) => setsaveRequeteButton(value)}
+                  saveButtonV={(value) =>
+                    setsaveRequeteButton(value) || reset()
+                  }
                   // data={DataGeojson}
                   data={FinalEntities}
                   dataImage={imageURLData}

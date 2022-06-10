@@ -12,7 +12,7 @@ export default function SaveCommentaire(props, saveButtonV) {
   const [saveButtonValue, setsaveButtonValue] = useState(true);
   const url = "http://127.0.0.1:8090/etudes";
   const stock = "aa";
-
+  console.log("id idididididid : " + props.id);
   // props.data
   //   ? console.log("yzyz " + JSON.stringify(props.data))
   //   : console.log("");
@@ -211,11 +211,11 @@ export default function SaveCommentaire(props, saveButtonV) {
           .post("http://127.0.0.1:8090/createRequete", {
             nom: NomCytoyen,
             tf: TF,
-            page: Page,
+            cin: Page,
             commentaire: a.comment,
             situation: getGeojsonMultiple(a),
             image: a.image,
-            etudeId: props.id,
+            etude_id: props.id,
           })
           .then((res) =>
             console.log("reponce : " + res) || res ? sendthru() : null
@@ -227,15 +227,16 @@ export default function SaveCommentaire(props, saveButtonV) {
           );
       });
     } else {
+      console.log("ddddddddddddddd :props.id : " + props.id);
       axios
         .post("http://127.0.0.1:8090/createRequete", {
           nom: NomCytoyen,
           tf: TF,
-          page: Page,
+          cin: Page,
           commentaire: commentaire,
           situation: getGeojsonOne(props.data),
           image: props.dataImage,
-          etudeId: props.id,
+          etude_id: parseInt(props.id),
         })
         .then((res) =>
           console.log("reponce : " + res) || res ? sendthru() : null
@@ -271,13 +272,13 @@ export default function SaveCommentaire(props, saveButtonV) {
           </div>
           <div class="form-group col-md-6">
             <label for="inputEmail4">
-              Page <span class="required">*</span>
+              CIN <span class="required">*</span>
             </label>
             <input
               type="text"
               class="form-control"
               id="inputPage"
-              placeholder="Exemple : Page 1"
+              placeholder="Exemple : AE202522"
               onChange={(e) => setPage(e.target.value)}
               required
             />

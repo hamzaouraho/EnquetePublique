@@ -153,8 +153,12 @@ export default function CreateEtude() {
     };
   }, []);
   const [ImportbuttonHide, setImportbuttonHide] = useState(false);
+  const [ImportFileLoadnHide, setImportFileLoadnHide] = useState(false);
   const addActiveClass = () => {
     setImportbuttonHide(!ImportbuttonHide);
+  };
+  const addActiveLoadfile = () => {
+    setImportFileLoadnHide(!ImportFileLoadnHide);
   };
   const [FileUploaded, setFileUploaded] = useState("");
   const showFileData = (e) => {
@@ -172,10 +176,10 @@ export default function CreateEtude() {
     reader.readAsText(e.target.files[0]);
   };
   let statesLabelClass = new LabelClass();
-
+  let vartetst = "";
   const addGeojsonFileInLayer = () => {
     // MapLayers.removeAll();
-
+    saidlkayd("Choisir la couche");
     // JSON.parse(FileUploaded).features.map((graphic) => {
     //   graphic.geometry.coordinates[0].map((coordonne) => tab.push(coordonne));
     // });
@@ -285,7 +289,6 @@ export default function CreateEtude() {
       }
     });
     // Allpermeteres = Allpermeteres + "}";
-    console.log(Titre, Intitule);
     axios
       .post("http://127.0.0.1:8090/createEtude", {
         titre: Titre,
@@ -529,7 +532,19 @@ export default function CreateEtude() {
       center: [divLayerSHowed[i].tab],
     });
   };
+  const saidlkayd = (e) => {
+    console.log("aazz : " + e + " " + vartetst);
+    if (e == "Choisir la couche") {
+      setImportFileLoadnHide(false);
+    } else if (e != vartetst) {
+      setImportFileLoadnHide(true);
+      vartetst = e;
+    }
+  };
   // console.log(divLayerSHowed);
+  const hiidediv = {
+    display: "none",
+  };
   return (
     <>
       <div
@@ -647,37 +662,62 @@ export default function CreateEtude() {
         >
           import
         </label>
-
         <div
           // className="HideImportButton"
           className={ImportbuttonHide ? "ShowImportButton" : "HideImportButton"}
         >
-          <input
-            type="file"
-            onChange={showFileData}
-            accept=".geojson"
-            style={{
-              margin: "10px",
-            }}
-          />
-
           <div>
-            <button
-              className="button-16"
-              // onClick={() => showFileData()}
-              onClick={() => addGeojsonFileInLayer()}
+            <select
+              onClick={(e) => saidlkayd(e.target.value)}
+              class="form-select"
+              aria-label="Default select example"
+              style={{ width: "256.889px", heignt: "24px" }}
             >
-              Charger
-            </button>
-            <button
-              className="button-16"
-              // onClick={() => setImportbuttonHide(!ImportbuttonHide)}
-              // onClick={() => addFeatures()}
-              id="add"
-            >
-              Abondonner
-            </button>
+              <option selected>Choisir la couche</option>
+              <option value="1">Zonage</option>
+              <option value="2">Equipement</option>
+              <option value="3">Voirie</option>
+            </select>
           </div>
+
+          {ImportFileLoadnHide ? (
+            <div
+              className={
+                ImportFileLoadnHide ? "ShowImportButton" : "HideImportButton"
+              }
+              style={{
+                margin: "5px 0px 0px 0px",
+                padding: "0px 15px 5px 15px ",
+              }}
+            >
+              <input
+                type="file"
+                onChange={showFileData}
+                accept=".geojson"
+                style={{
+                  margin: "10px",
+                }}
+              />
+
+              <div>
+                <button
+                  className="button-16"
+                  // onClick={() => showFileData()}
+                  onClick={() => addGeojsonFileInLayer()}
+                >
+                  Charger
+                </button>
+                <button
+                  className="button-16"
+                  // onClick={() => setImportbuttonHide(!ImportbuttonHide)}
+                  // onClick={() => addFeatures()}
+                  id="add"
+                >
+                  Abondonner
+                </button>
+              </div>
+            </div>
+          ) : null}
 
           <hr style={{ marginBottom: "0px", paddingBottom: "0px" }} />
           <div
